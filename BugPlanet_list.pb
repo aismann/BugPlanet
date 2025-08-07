@@ -26,7 +26,10 @@ If Int(#PB_Compiler_Version) < #COMPILER_MINIMUM_VERSION
   Debug "This snippet uses features presented with that update."
   End
 EndIf
-
+If #PB_Compiler_Debugger
+  Debug "Please compile debugger off"
+  ;; End
+EndIf
 
 ;- 1 Inits
 ; UsePNGImageEncoder()
@@ -144,7 +147,7 @@ tank\load = 0
 Global bugscount.i = 0
 Global bugswiper.i = #BGS
 Global NewList bugs()
-Global Dim object.pstruct(2020)
+Global NewList object.pstruct()
 Global aim.coord3d
 Global matanim.i
 Global tsp.f
@@ -414,32 +417,33 @@ Procedure spawnbug(num, x1, y1, x2, y2, big, behavior)
   count = 0
   For x = #BGS To #BGE
     If Not IsEntity(x)And count<num
-      AddElement(bugs()) : bugs() = x : bugscount+1
-      CreateEntity(x, MeshID(#box), MaterialID(#btex1), x1+Random(x2-x1), 20, y1+Random(y2-y1), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+      *obj.pstruct = AddElement(object())
+      AddElement(bugs()) : bugs() = *obj : bugscount+1
+      CreateEntity(*obj, MeshID(#box), MaterialID(#btex1), x1+Random(x2-x1), 20, y1+Random(y2-y1), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
       c = Random(big, 0)
-      object(x)\t = -1
+      *obj\t = -1
       If c = 1
-        object(x)\armor = 50
-        object(x)\ID = #BUG
-        object(x)\spmax = 10+Random(20, 10)
+        *obj\armor = 50
+        *obj\ID = #BUG
+        *obj\spmax = 10+Random(20, 10)
         f.f = 1.5+Random(500)/1000
-        ScaleEntity(x, 2, 2, 2)
-        object(x)\behavior = behavior
-        object(x)\aggrorange = 250000+Random(250000)
+        ScaleEntity(*obj, 2, 2, 2)
+        *obj\behavior = behavior
+        *obj\aggrorange = 250000+Random(250000)
       Else
-        object(x)\armor = 6
-        object(x)\ID = #BUG
-        object(x)\spmax = 60+Random(30, 10)
+        *obj\armor = 6
+        *obj\ID = #BUG
+        *obj\spmax = 60+Random(30, 10)
         f.f = 1.0+Random(100)/1000
-        ScaleEntity(x, f, f, f)
-        object(x)\behavior = behavior
-        object(x)\aggrorange = 400000+Random(100000)
+        ScaleEntity(*obj, f, f, f)
+        *obj\behavior = behavior
+        *obj\aggrorange = 400000+Random(100000)
       EndIf
       count+1
-      CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 1)
-      EntityAngularFactor(x, 0, 1, 0)
-      EntityLinearFactor(x, 1, 0, 1)
-      If count = num : x = #BGE : EndIf
+      CreateEntityBody(*obj, #PB_Entity_BoxBody, 1, 1, 1)
+      EntityAngularFactor(*obj, 0, 1, 0)
+      EntityLinearFactor(*obj, 1, 0, 1)
+      If count = num :  : EndIf
     EndIf
   Next x
 EndProcedure
@@ -571,29 +575,30 @@ Procedure app_start()
   ; generate the objects 
   For x = #RESS To #RESE
     test = Random(4, 1)
+    *obj.pstruct = AddElement(object())
     If test = 4
-      CreateEntity(x, MeshID(#BOX), MaterialID(#BOX), -5000+Random(10000), 20, -5000+Random(10000), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
-      EntityRenderMode(x, #PB_Entity_DisplaySkeleton )
-      object(x)\id = #BOX
-      object(x)\armor = 3+Random(3)
-      CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(x, 0, Random(360), 0)
-      EntityAngularFactor(x, 0, 0.1, 0)
-      EntityLinearFactor(x, 0.1, 0, 0.1)
-      SetEntityAttribute(x, #PB_Entity_AngularSleeping, 10)
-      SetEntityAttribute(x, #PB_Entity_LinearSleeping, 10)
-      SetEntityAttribute(x, #PB_Entity_MaxVelocity, 20)
+      CreateEntity(*obj, MeshID(#BOX), MaterialID(#BOX), -5000+Random(10000), 20, -5000+Random(10000), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+      EntityRenderMode(*obj, #PB_Entity_DisplaySkeleton )
+      *obj\id = #BOX
+      *obj\armor = 3+Random(3)
+      CreateEntityBody(*obj, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(x, 0, Random(360), 0)
+      EntityAngularFactor(*obj, 0, 0.1, 0)
+      EntityLinearFactor(*obj, 0.1, 0, 0.1)
+      SetEntityAttribute(*obj, #PB_Entity_AngularSleeping, 10)
+      SetEntityAttribute(*obj, #PB_Entity_LinearSleeping, 10)
+      SetEntityAttribute(*obj, #PB_Entity_MaxVelocity, 20)
     Else
-      CreateEntity(x, MeshID(#EGG), MaterialID(#EGG), -5000+Random(10000), 20, -5000+Random(10000), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
-      ScaleEntity(x, 2, 2, 2)
-      object(x)\id = #EGG
-      object(x)\armor = 10+Random(10)
-      CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(x, 0, Random(360), 0)
-      EntityAngularFactor(x, 0, 0.025, 0)
-      EntityLinearFactor(x, 0.025, 0, 0.025)
-      SetEntityAttribute(x, #PB_Entity_AngularSleeping, 0.1)
-      SetEntityAttribute(x, #PB_Entity_LinearSleeping, 1)
-      SetEntityAttribute(x, #PB_Entity_MaxVelocity, 0)
-      SetEntityAttribute(x, #PB_Entity_Friction, 10)   
+      CreateEntity(*obj, MeshID(#EGG), MaterialID(#EGG), -5000+Random(10000), 20, -5000+Random(10000), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+      ScaleEntity(*obj, 2, 2, 2)
+      *obj\id = #EGG
+      *obj\armor = 10+Random(10)
+      CreateEntityBody(*obj, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(*obj, 0, Random(360), 0)
+      EntityAngularFactor(*obj, 0, 0.025, 0)
+      EntityLinearFactor(*obj, 0.025, 0, 0.025)
+      SetEntityAttribute(*obj, #PB_Entity_AngularSleeping, 0.1)
+      SetEntityAttribute(*obj, #PB_Entity_LinearSleeping, 1)
+      SetEntityAttribute(*obj, #PB_Entity_MaxVelocity, 0)
+      SetEntityAttribute(*obj, #PB_Entity_Friction, 10)   
     EndIf
   Next x
   createmat(#WALL, ?wall, 16)
@@ -606,48 +611,57 @@ Procedure app_start()
     Repeat  
       tz = Random(10000)-20000
     Until Abs(tz)>250
-    CreateEntity(x, MeshID(#WALL), MaterialID(#WALL), tx, 48+x*0.001, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA): RotateEntity(x, 0, Random(360), 0)
-    ScaleEntity(x, 2, 1, 2)
-    CreateEntityBody(x, #PB_Entity_StaticBody, 1, 1, 1) 
-    object(x)\id = #WALL
+    *obj.pstruct = AddElement(object())
+    CreateEntity(*obj, MeshID(#WALL), MaterialID(#WALL), tx, 48+x*0.001, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA): RotateEntity(*obj, 0, Random(360), 0)
+    ScaleEntity(*obj, 2, 1, 2)
+    CreateEntityBody(*obj, #PB_Entity_StaticBody, 1, 1, 1) 
+    *obj\id = #WALL
   Next x
+  *obj.pstruct = AddElement(object())
   CreateEntity(#WALL_RIGHT, MeshID(#WALL), MaterialID(#WALL), tx, 58+x*0.1, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA) 
   ScaleEntity(#WALL_RIGHT, 100, 10, 2, #PB_Absolute)
   MoveEntity(#WALL_RIGHT, 0, 10, 5012.5, #PB_World|#PB_Absolute)
   CreateEntityBody(#WALL_RIGHT, #PB_Entity_StaticBody, 1, 1, 1) 
-  object(#WALL_RIGHT)\id = #WALL
+  *obj\id = #WALL
   CreateEntity(#WALL_LEFT, MeshID(#WALL), MaterialID(#WALL), tx, 98+x*0.1, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA) 
   ScaleEntity(#WALL_LEFT, 100, 10, 2, #PB_Absolute)
   MoveEntity(#WALL_LEFT, 0, 15, -5012.5, #PB_World|#PB_Absolute)
   CreateEntityBody(#WALL_LEFT, #PB_Entity_StaticBody, 1, 1, 1) 
-  object(#WALL_LEFT)\id = #WALL
+  *obj.pstruct = AddElement(object())
+  *obj\id = #WALL
   CreateEntity(#WALL_BELOW, MeshID(#WALL), MaterialID(#WALL), tx, 98+x*0.1, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
   RotateEntity(#WALL_BELOW, 0, 90, 0)
   ScaleEntity(#WALL_BELOW, 100, 10, 2, #PB_Absolute)
   MoveEntity(#WALL_BELOW, -5012.5, 20, 0, #PB_World|#PB_Absolute)
   CreateEntityBody(#WALL_BELOW, #PB_Entity_StaticBody, 1, 1, 1) 
-  object(#WALL_BELOW)\id = #WALL
+  *obj.pstruct = AddElement(object())
+  *obj\id = #WALL
   CreateEntity( #WALL_ABOVE, MeshID(#WALL), MaterialID(#WALL), tx, 98+x*0.1, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
   RotateEntity( #WALL_ABOVE, 0, 90, 0)
   ScaleEntity( #WALL_ABOVE, 100, 10, 2, #PB_Absolute)
   MoveEntity( #WALL_ABOVE, 5012.5, 25, 0, #PB_World|#PB_Absolute)
   CreateEntityBody( #WALL_ABOVE, #PB_Entity_StaticBody, 1, 1, 1) 
-  object(#WALL_ABOVE)\id = #WALL
+  *obj.pstruct = AddElement(object())
+  *obj\id = #WALL
+  
   createmat(#NEST, ?nest, 16)
   setmat_basic(#NEST)
   CreateCube(#NEST, 300)
+  *obj.pstruct = AddElement(object())
+  *obj\id = #NEST
   CreateEntity(#NEST, MeshID(#NEST), MaterialID(#NEST), 0, 0, 0, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
   CreateEntityBody(#NEST, #PB_Entity_SphereBody, 1, 1, 1, 1, 200, 200, 200) 
   MoveEntity(#NEST, 0, -100, 4500, #PB_World|#PB_Absolute)
   EntityAngularFactor(#NEST, 0, 0, 0)
   EntityLinearFactor(#NEST, 0, 0, 0)
-  object(#NEST)\id = #NEST
-  object(#NEST)\armor = 1500
+  *obj\armor = 1500
   MoveEntity(#NEST, 0, 0, 0, #PB_Local|#PB_Relative)
+  
   createmat(#btex1, ?bug1, 16)
   setmat_basic(#btex1)
   createmat(#btex2, ?bug2, 16)
   setmat_basic(#btex2)
+  
   createmat(#AIM, ?aim, 16)
   setmat_basic(#AIM)
   CreateCube(#AIM, 50)
@@ -731,10 +745,10 @@ Procedure app_update()
       EntityVelocity(#hull, 0, 0, 0)
     EndIf
     MoveEntity(#TURR, EntityX(#HULL), 61, EntityZ(#HULL), #PB_World|#PB_Absolute)
-    
     If MouseButton(#PB_MouseButton_Left) Or KeyboardPushed(#PB_Key_E)
       rayhitbool = RayCast(EntityX(#aim), 5000, EntityZ(#aim), 0 , -5000, 0, #MASK_GENERALPICKMASK)
       If rayhitbool
+        Debug "rayhitbool " + Str(rayhitbool)
         If IsEntity(rayhitbool)
           If tank\box<5 And object(rayhitbool)\id = #BOX
             If (EntityX(#HULL)-PickX())*(EntityX(#HULL)-PickX())+(EntityZ(#HULL)-PickZ())*(EntityZ(#HULL)-PickZ())<10000
@@ -1275,8 +1289,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 28
-; FirstLine = 9
+; CursorPosition = 751
+; FirstLine = 733
 ; Folding = -------------------------
 ; EnableXP
 ; DPIAware
