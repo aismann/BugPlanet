@@ -16,6 +16,7 @@
 
 ; BugsPlanet v1.2 icesoft 20250831
 ; * Source code redesign (clean code) #part2
+; - Empty egg (only one) can collect (armor+100+random(100))
 
 
 ;- 0 Compiler checks
@@ -1276,7 +1277,7 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 2
+; CursorPosition = 18
 ; Folding = -------------------------
 ; EnableXP
 ; DPIAware
