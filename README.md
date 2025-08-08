@@ -13,7 +13,7 @@ Lose condition:
 You lose if the bugs bite trough the armor of your vehicle.
 
 
-Control the game:
+# Control the game:
 
 Rightclick:
 Fire!
