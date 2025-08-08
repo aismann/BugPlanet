@@ -21,7 +21,7 @@ Rightclick:
 
 'E' or leftclick:
 
-- On obejcts, you collect some object (crate, egg hull, energie unit, ...)
+- On objects, you collect some object (crate, egg hull, energie unit, ...)
 - At the base, at the center of the area. You can even exchange them for ammo or armor.
 
 'H':
