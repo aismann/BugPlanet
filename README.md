@@ -16,7 +16,8 @@ You lose if the bugs bite trough the armor of your vehicle.
 ## Control the game:
 
 Rightclick:
-Fire!
+
+- Fire!
 
 'E' or leftclick:
 
@@ -25,7 +26,7 @@ Fire!
 
 'H':
 
-Shows the way to your helipad
+- Shows the way to your helipad
 
 
 Gameplay time is circa 20-25 minutes until someone wins or loses. 
