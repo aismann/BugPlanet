@@ -743,8 +743,10 @@ Procedure app_update()
               tank\collected+1
               PlaySound(pickup)
             EndIf
+            
           ElseIf rayhitbool>= #RESS And rayhitbool<= #RESE And tank\box = 5
-            PlaySound(empty)         
+            PlaySound(empty)     
+            
           ElseIf object(rayhitbool)\id = #EGGEMPTY
             If (EntityX(#HULL)-PickX())*(EntityX(#HULL)-PickX())+(EntityZ(#HULL)-PickZ())*(EntityZ(#HULL)-PickZ())<10000
               tank\armor +object(rayhitbool)\armor
@@ -755,8 +757,9 @@ Procedure app_update()
         EndIf
       EndIf
       If rayhitbool = -1
-        If EntityX(#aim)>-100 And EntityX(#aim)<100 And EntityX(#hull)>-100 And EntityX(#hull)<100
-          If EntityZ(#aim)>-100 And EntityZ(#aim)<100 And EntityZ(#hull)>-100 And EntityZ(#hull)<100
+        
+        If EntityX(#aim) >- 100 And EntityX(#aim)<100 And EntityX(#hull) >- 100 And EntityX(#hull)<100
+          If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
             If tank\box>0 And tank\load<50 And ticker::triggered(1)
               tank\box-1
               tank\load+1
@@ -775,7 +778,7 @@ Procedure app_update()
           EndIf
         EndIf
         If EntityX(#aim)>184 And EntityX(#aim)<406 And EntityX(#hull)>184 And EntityX(#hull)<406
-          If EntityZ(#aim)>-100 And EntityZ(#aim)<100 And EntityZ(#hull)>-100 And EntityZ(#hull)<100
+          If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
             If tank\box>0 And tank\armor<450 And ticker::triggered(1)              
               If tank\armor< tank\maxArmor 
                 tank\box-1
@@ -786,8 +789,8 @@ Procedure app_update()
             EndIf
           EndIf
         EndIf
-        If EntityX(#aim)>-400 And EntityX(#aim)<-200 And EntityX(#hull)>-400 And EntityX(#hull)<-200
-          If EntityZ(#aim)>-100 And EntityZ(#aim)<100 And EntityZ(#hull)>-100 And EntityZ(#hull)<100
+        If EntityX(#aim) >- 400 And EntityX(#aim)<-200 And EntityX(#hull) >- 400 And EntityX(#hull)<-200
+          If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
             If tank\box>0 And tank\ammo<999 And ticker::triggered(1)             
               If tank\ammo>tank\maxAmmo 
                 tank\box-1
@@ -1079,12 +1082,12 @@ Procedure app_update()
     FreeMesh(3001)
   EndIf
   RenderWorld(60)
-  If EntityX(#hull)>-400 And EntityX(#hull)<406
-    If EntityZ(#hull)>-100 And EntityZ(#hull)<100
-      If EntityX(#hull)>-400 And EntityX(#hull)<-200
+  If EntityX(#hull) >- 400 And EntityX(#hull)<406
+    If EntityZ(#hull) >- 100 And EntityZ(#hull)<100
+      If EntityX(#hull) >- 400 And EntityX(#hull)<-200
         petskii::ctobject(ScreenWidth()/2, ScreenHeight()/2+50, "Exchange 1 crate for 50 AMMUNITION.", c1, c2)
       EndIf
-      If EntityX(#hull)>-100 And EntityX(#hull)<100
+      If EntityX(#hull) >- 100 And EntityX(#hull)<100
         petskii::ctobject(ScreenWidth()/2, ScreenHeight()/2+50, "Load 50 crates to Helipad to WIN.", c1, c2)
       EndIf
       If EntityX(#hull)>200 And EntityX(#hull)<400
@@ -1275,8 +1278,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 28
-; FirstLine = 9
+; CursorPosition = 1084
+; FirstLine = 1054
 ; Folding = -------------------------
 ; EnableXP
 ; DPIAware
