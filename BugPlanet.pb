@@ -41,7 +41,7 @@ InitSound()
 #MAINDESKTOP_H        = 0
 #MAINWINDOW_H         = 0
 #MAINWINDOW_NAME      = "Bug Planet"
-#MAINWINDOW_FLAGS     = #PB_Window_BorderLess|#PB_Window_ScreenCentered
+#MAINWINDOW_FLAGS     = #PB_Window_ScreenCentered
 #MAINWINDOW_RESIZE    = 1
 #MAINWINDOW_TOPOFFSET = 0
 #SCREEN_FLAGS         = #PB_Screen_WaitSynchronization
@@ -475,6 +475,7 @@ Procedure app_start()
   ExamineDesktops()
   OpenWindow(#MAINWINDOW_H, 0, 0, DesktopUnscaledX(DesktopWidth(#MAINDESKTOP_H)), DesktopUnscaledY(DesktopHeight(#MAINDESKTOP_H)), #MAINWINDOW_NAME, #MAINWINDOW_FLAGS)
   OpenWindowedScreen(WindowID(#MAINWINDOW_H), 0, 0, WindowWidth(#MAINWINDOW_H), WindowHeight(#MAINWINDOW_H), #AUTOSTRETCH_ON, 0, 0, #SCREEN_FLAGS)
+  
   SetFrameRate(#SCREEN_FRAMERATE)
   midscreen\x = ScreenWidth()/2
   midscreen\y = ScreenHeight()/2
@@ -734,33 +735,33 @@ Procedure app_update()
     
     If MouseButton(#PB_MouseButton_Left) Or KeyboardPushed(#PB_Key_E)
       rayhitbool = RayCast(EntityX(#aim), 5000, EntityZ(#aim), 0 , -5000, 0, #MASK_GENERALPICKMASK)
-      If rayhitbool
-        If IsEntity(rayhitbool)
-          If tank\box<5 And object(rayhitbool)\id = #BOX
-            If (EntityX(#HULL)-PickX())*(EntityX(#HULL)-PickX())+(EntityZ(#HULL)-PickZ())*(EntityZ(#HULL)-PickZ())<10000
-              FreeEntity(rayhitbool)
-              tank\box+1
-              tank\collected+1
-              PlaySound(pickup)
-            EndIf
-            
-          ElseIf rayhitbool>= #RESS And rayhitbool<= #RESE And tank\box = 5
-            PlaySound(empty)     
-            
-          ElseIf object(rayhitbool)\id = #EGGEMPTY
-            If (EntityX(#HULL)-PickX())*(EntityX(#HULL)-PickX())+(EntityZ(#HULL)-PickZ())*(EntityZ(#HULL)-PickZ())<10000
-              tank\armor +object(rayhitbool)\armor
-              FreeEntity(rayhitbool)
-              PlaySound(pickup)
-            EndIf
+      ;  If rayhitbool
+      If IsEntity(rayhitbool)
+        If tank\box<5 And object(rayhitbool)\id = #BOX
+          If (EntityX(#HULL)-PickX())*(EntityX(#HULL)-PickX())+(EntityZ(#HULL)-PickZ())*(EntityZ(#HULL)-PickZ())<10000
+            FreeEntity(rayhitbool)
+            tank\box+1
+            tank\collected+1
+            PlaySound(pickup)
+          EndIf
+          
+        ElseIf rayhitbool>= #RESS And rayhitbool<= #RESE And tank\box = 5
+          PlaySound(empty)     
+         
+        ElseIf object(rayhitbool)\id = #EGGEMPTY
+          If (EntityX(#HULL)-PickX())*(EntityX(#HULL)-PickX())+(EntityZ(#HULL)-PickZ())*(EntityZ(#HULL)-PickZ())<10000
+            tank\armor +object(rayhitbool)\armor
+            FreeEntity(rayhitbool)
+            PlaySound(pickup)
           EndIf
         EndIf
       EndIf
-      If rayhitbool = -1
+      ; EndIf
+      If rayhitbool = -1  
         
         If EntityX(#aim) >- 100 And EntityX(#aim)<100 And EntityX(#hull) >- 100 And EntityX(#hull)<100
           If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
-            If tank\box>0 And tank\load<50 And ticker::triggered(1)
+            If tank\box>0 And tank\load<50 ;And ticker::triggered(1)
               tank\box-1
               tank\load+1
               If tank\load = 50
@@ -779,11 +780,9 @@ Procedure app_update()
         EndIf
         If EntityX(#aim)>184 And EntityX(#aim)<406 And EntityX(#hull)>184 And EntityX(#hull)<406
           If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
-            If tank\box>0 And tank\armor<450 And ticker::triggered(1)              
-              If tank\armor< tank\maxArmor 
-                tank\box-1
-                tank\armor+25          
-              EndIf
+            If tank\box>0 And tank\armor<tank\maxArmor ; And ticker::triggered(1)                         
+              tank\box-1
+              tank\armor+25                     
               tank\spentarmor+1
               PlaySound(pickup)
             EndIf
@@ -791,12 +790,10 @@ Procedure app_update()
         EndIf
         If EntityX(#aim) >- 400 And EntityX(#aim)<-200 And EntityX(#hull) >- 400 And EntityX(#hull)<-200
           If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
-            If tank\box>0 And tank\ammo<999 And ticker::triggered(1)             
-              If tank\ammo>tank\maxAmmo 
-                tank\box-1
-                tank\ammo+50
-                tank\spentammo+1
-              EndIf
+            If tank\box>0 And tank\ammo<tank\maxAmmo ;And ticker::triggered(1)                         
+              tank\box-1
+              tank\ammo+50
+              tank\spentammo+1          
               PlaySound(pickup)
             EndIf
           EndIf
@@ -1278,8 +1275,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 1084
-; FirstLine = 1054
+; CursorPosition = 43
+; FirstLine = 18
 ; Folding = -------------------------
 ; EnableXP
 ; DPIAware
