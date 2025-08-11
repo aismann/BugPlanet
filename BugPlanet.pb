@@ -40,7 +40,7 @@ InitSound()
 ;- 2 Constants
 #MAINDESKTOP_H        = 0
 #MAINWINDOW_H         = 0
-#MAINWINDOW_NAME      = "Bug Planet"
+#MAINWINDOW_NAME      = "Bug Planet 1.2"
 #MAINWINDOW_FLAGS     = #PB_Window_ScreenCentered
 #MAINWINDOW_RESIZE    = 1
 #MAINWINDOW_TOPOFFSET = 0
@@ -714,11 +714,11 @@ Procedure app_update()
       RotateEntity(#HULL, 0, 0, 0, #PB_World|#PB_Relative)
     EndIf
     If KeyboardPushed(#PB_Key_W) Or KeyboardPushed(#PB_Key_S) Or KeyboardPushed(#PB_Key_Up) Or KeyboardPushed(#PB_Key_Down)
-      If KeyboardPushed(#PB_Key_S) Or KeyboardPushed(#PB_Key_Down)
+      If KeyboardPushed(#PB_Key_S) Or KeyboardPushed(#PB_Key_Down)  ; green = Back = slower 
         tsp = tsp*0.97+(100*-0.03)
         If tsp<-60 : tsp = -60 : EndIf
       EndIf
-      If KeyboardPushed(#PB_Key_W) Or KeyboardPushed(#PB_Key_Up)
+      If KeyboardPushed(#PB_Key_W) Or KeyboardPushed(#PB_Key_Up)  ; blue = Front = faster 
         tsp = tsp*0.95+(100*0.05)
         If tsp>100 : tsp = 100 : EndIf
       EndIf
@@ -761,7 +761,7 @@ Procedure app_update()
         
         If EntityX(#aim) >- 100 And EntityX(#aim)<100 And EntityX(#hull) >- 100 And EntityX(#hull)<100
           If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
-            If tank\box>0 And tank\load<50 ;And ticker::triggered(1)
+            If tank\box>0 And tank\load<50 And ticker::triggered(1)
               tank\box-1
               tank\load+1
               If tank\load = 50
@@ -780,7 +780,7 @@ Procedure app_update()
         EndIf
         If EntityX(#aim)>184 And EntityX(#aim)<406 And EntityX(#hull)>184 And EntityX(#hull)<406
           If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
-            If tank\box>0 And tank\armor<tank\maxArmor ; And ticker::triggered(1)                         
+            If tank\box>0 And tank\armor<tank\maxArmor And ticker::triggered(1)                         
               tank\box-1
               tank\armor+25                     
               tank\spentarmor+1
@@ -790,7 +790,7 @@ Procedure app_update()
         EndIf
         If EntityX(#aim) >- 400 And EntityX(#aim)<-200 And EntityX(#hull) >- 400 And EntityX(#hull)<-200
           If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
-            If tank\box>0 And tank\ammo<tank\maxAmmo ;And ticker::triggered(1)                         
+            If tank\box>0 And tank\ammo<tank\maxAmmo And ticker::triggered(1)                         
               tank\box-1
               tank\ammo+50
               tank\spentammo+1          
@@ -1275,8 +1275,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 43
-; FirstLine = 18
+; CursorPosition = 792
+; FirstLine = 761
 ; Folding = -------------------------
 ; EnableXP
 ; DPIAware
