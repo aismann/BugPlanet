@@ -14,10 +14,14 @@
 ; - removed shadow
 ; - Debug mode is only a warning
 
-; BugsPlanet v1.2 icesoft 20250831
+; BugsPlanet v1.2 icesoft 20250811
 ; * Source code redesign (clean code) #part2
 ; - Empty egg (only one) can collect (armor+100+random(100))
+; - tank blue = forward and drives faster
 
+; BugsPlanet v1.3 icesoft 20250831
+; * Source code redesign (clean code) #part3
+; * Switch to Map (faster/shorter)
 
 ;- 0 Compiler checks
 #COMPILER_MINIMUM_VERSION = 621
@@ -26,7 +30,6 @@ If Int(#PB_Compiler_Version) < #COMPILER_MINIMUM_VERSION
   Debug "This snippet uses features presented with that update."
   End
 EndIf
-
 
 ;- 1 Inits
 ; UsePNGImageEncoder()
@@ -144,7 +147,9 @@ tank\load = 0
 Global bugscount.i = 0
 Global bugswiper.i = #BGS
 Global NewList bugs()
-Global Dim object.pstruct(2020)
+
+Global NewMap object.pstruct()
+;Global Dim object.pstruct(2020)
 Global aim.coord3d
 Global matanim.i
 Global tsp.f
@@ -412,36 +417,34 @@ EndProcedure
 
 Procedure spawnbug(num, x1, y1, x2, y2, big, behavior)
   count = 0
-  For x = #BGS To #BGE
-    If Not IsEntity(x)And count<num
-      AddElement(bugs()) : bugs() = x : bugscount+1
-      CreateEntity(x, MeshID(#box), MaterialID(#btex1), x1+Random(x2-x1), 20, y1+Random(y2-y1), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
-      c = Random(big, 0)
-      object(x)\t = -1
-      If c = 1
-        object(x)\armor = 50
-        object(x)\ID = #BUG
-        object(x)\spmax = 10+Random(20, 10)
-        f.f = 1.5+Random(500)/1000
-        ScaleEntity(x, 2, 2, 2)
-        object(x)\behavior = behavior
-        object(x)\aggrorange = 250000+Random(250000)
-      Else
-        object(x)\armor = 6
-        object(x)\ID = #BUG
-        object(x)\spmax = 60+Random(30, 10)
-        f.f = 1.0+Random(100)/1000
-        ScaleEntity(x, f, f, f)
-        object(x)\behavior = behavior
-        object(x)\aggrorange = 400000+Random(100000)
-      EndIf
-      count+1
-      CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 1)
-      EntityAngularFactor(x, 0, 1, 0)
-      EntityLinearFactor(x, 1, 0, 1)
-      If count = num : x = #BGE : EndIf
+  For n = 1 To num
+    
+    entity = CreateEntity(#PB_Any, MeshID(#box), MaterialID(#btex1), x1+Random(x2-x1), 20, y1+Random(y2-y1), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+    AddElement(bugs()) : bugs() = entity : bugscount+1
+    c = Random(big, 0)
+    object(Str(entity))\t = -1
+    If c = 1
+      object()\armor = 50
+      object()\ID = #BUG
+      object()\spmax = 10+Random(20, 10)
+      f.f = 1.5+Random(500)/1000
+      ScaleEntity(entity, 2, 2, 2)
+      object()\behavior = behavior
+      object()\aggrorange = 250000+Random(250000)
+    Else
+      object()\armor = 6
+      object()\ID = #BUG
+      object()\spmax = 60+Random(30, 10)
+      f.f = 1.0+Random(100)/1000
+      ScaleEntity(entity, f, f, f)
+      object()\behavior = behavior
+      object()\aggrorange = 400000+Random(100000)
     EndIf
-  Next x
+    count+1
+    CreateEntityBody(entity, #PB_Entity_BoxBody, 1, 1, 1)
+    EntityAngularFactor(entity, 0, 1, 0)
+    EntityLinearFactor(entity, 1, 0, 1)
+  Next n
 EndProcedure
 
 Procedure createmat(id.i, *img, size.i)
@@ -573,28 +576,28 @@ Procedure app_start()
   For x = #RESS To #RESE
     test = Random(4, 1)
     If test = 4
-      CreateEntity(x, MeshID(#BOX), MaterialID(#BOX), -5000+Random(10000), 20, -5000+Random(10000), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
-      EntityRenderMode(x, #PB_Entity_DisplaySkeleton )
-      object(x)\id = #BOX
-      object(x)\armor = 3+Random(3)
-      CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(x, 0, Random(360), 0)
-      EntityAngularFactor(x, 0, 0.1, 0)
-      EntityLinearFactor(x, 0.1, 0, 0.1)
-      SetEntityAttribute(x, #PB_Entity_AngularSleeping, 10)
-      SetEntityAttribute(x, #PB_Entity_LinearSleeping, 10)
-      SetEntityAttribute(x, #PB_Entity_MaxVelocity, 20)
+      entity = CreateEntity(#PB_Any, MeshID(#BOX), MaterialID(#BOX), -5000+Random(10000), 20, -5000+Random(10000), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+      EntityRenderMode(entity, #PB_Entity_DisplaySkeleton )
+      object(Str(entity))\id = #BOX
+      object()\armor = 3+Random(3)
+      CreateEntityBody(entity, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(entity, 0, Random(360), 0)
+      EntityAngularFactor(entity, 0, 0.1, 0)
+      EntityLinearFactor(entity, 0.1, 0, 0.1)
+      SetEntityAttribute(entity, #PB_Entity_AngularSleeping, 10)
+      SetEntityAttribute(entity, #PB_Entity_LinearSleeping, 10)
+      SetEntityAttribute(entity, #PB_Entity_MaxVelocity, 20)
     Else
-      CreateEntity(x, MeshID(#EGG), MaterialID(#EGG), -5000+Random(10000), 20, -5000+Random(10000), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
-      ScaleEntity(x, 2, 2, 2)
-      object(x)\id = #EGG
-      object(x)\armor = 10+Random(10)
-      CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(x, 0, Random(360), 0)
-      EntityAngularFactor(x, 0, 0.025, 0)
-      EntityLinearFactor(x, 0.025, 0, 0.025)
-      SetEntityAttribute(x, #PB_Entity_AngularSleeping, 0.1)
-      SetEntityAttribute(x, #PB_Entity_LinearSleeping, 1)
-      SetEntityAttribute(x, #PB_Entity_MaxVelocity, 0)
-      SetEntityAttribute(x, #PB_Entity_Friction, 10)   
+      entity = CreateEntity(#PB_Any, MeshID(#EGG), MaterialID(#EGG), -5000+Random(10000), 20, -5000+Random(10000), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+      ScaleEntity(entity, 2, 2, 2)
+      object(Str(entity))\id = #EGG
+      object()\armor = 10+Random(10)
+      CreateEntityBody(entity, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(entity, 0, Random(360), 0)
+      EntityAngularFactor(entity, 0, 0.025, 0)
+      EntityLinearFactor(entity, 0.025, 0, 0.025)
+      SetEntityAttribute(entity, #PB_Entity_AngularSleeping, 0.1)
+      SetEntityAttribute(entity, #PB_Entity_LinearSleeping, 1)
+      SetEntityAttribute(entity, #PB_Entity_MaxVelocity, 0)
+      SetEntityAttribute(entity, #PB_Entity_Friction, 10)   
     EndIf
   Next x
   createmat(#WALL, ?wall, 16)
@@ -607,33 +610,34 @@ Procedure app_start()
     Repeat  
       tz = Random(10000)-20000
     Until Abs(tz)>250
-    CreateEntity(x, MeshID(#WALL), MaterialID(#WALL), tx, 48+x*0.001, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA): RotateEntity(x, 0, Random(360), 0)
-    ScaleEntity(x, 2, 1, 2)
-    CreateEntityBody(x, #PB_Entity_StaticBody, 1, 1, 1) 
-    object(x)\id = #WALL
+    entity =CreateEntity(#PB_Any, MeshID(#WALL), MaterialID(#WALL), tx, 48+x*0.001, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA): 
+    RotateEntity(entity, 0, Random(360), 0)
+    ScaleEntity(entity, 2, 1, 2)
+    CreateEntityBody(entity, #PB_Entity_StaticBody, 1, 1, 1) 
+    object(Str(entity))\id = #WALL
   Next x
   CreateEntity(#WALL_RIGHT, MeshID(#WALL), MaterialID(#WALL), tx, 58+x*0.1, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA) 
   ScaleEntity(#WALL_RIGHT, 100, 10, 2, #PB_Absolute)
   MoveEntity(#WALL_RIGHT, 0, 10, 5012.5, #PB_World|#PB_Absolute)
   CreateEntityBody(#WALL_RIGHT, #PB_Entity_StaticBody, 1, 1, 1) 
-  object(#WALL_RIGHT)\id = #WALL
+  object(Str(#WALL_RIGHT))\id = #WALL
   CreateEntity(#WALL_LEFT, MeshID(#WALL), MaterialID(#WALL), tx, 98+x*0.1, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA) 
   ScaleEntity(#WALL_LEFT, 100, 10, 2, #PB_Absolute)
   MoveEntity(#WALL_LEFT, 0, 15, -5012.5, #PB_World|#PB_Absolute)
   CreateEntityBody(#WALL_LEFT, #PB_Entity_StaticBody, 1, 1, 1) 
-  object(#WALL_LEFT)\id = #WALL
+  object(Str(#WALL_LEFT))\id = #WALL
   CreateEntity(#WALL_BELOW, MeshID(#WALL), MaterialID(#WALL), tx, 98+x*0.1, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
   RotateEntity(#WALL_BELOW, 0, 90, 0)
   ScaleEntity(#WALL_BELOW, 100, 10, 2, #PB_Absolute)
   MoveEntity(#WALL_BELOW, -5012.5, 20, 0, #PB_World|#PB_Absolute)
   CreateEntityBody(#WALL_BELOW, #PB_Entity_StaticBody, 1, 1, 1) 
-  object(#WALL_BELOW)\id = #WALL
+  object(Str(#WALL_BELOW))\id = #WALL
   CreateEntity( #WALL_ABOVE, MeshID(#WALL), MaterialID(#WALL), tx, 98+x*0.1, tz, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
   RotateEntity( #WALL_ABOVE, 0, 90, 0)
   ScaleEntity( #WALL_ABOVE, 100, 10, 2, #PB_Absolute)
   MoveEntity( #WALL_ABOVE, 5012.5, 25, 0, #PB_World|#PB_Absolute)
   CreateEntityBody( #WALL_ABOVE, #PB_Entity_StaticBody, 1, 1, 1) 
-  object(#WALL_ABOVE)\id = #WALL
+  object(Str(#WALL_ABOVE))\id = #WALL
   createmat(#NEST, ?nest, 16)
   setmat_basic(#NEST)
   CreateCube(#NEST, 300)
@@ -642,8 +646,8 @@ Procedure app_start()
   MoveEntity(#NEST, 0, -100, 4500, #PB_World|#PB_Absolute)
   EntityAngularFactor(#NEST, 0, 0, 0)
   EntityLinearFactor(#NEST, 0, 0, 0)
-  object(#NEST)\id = #NEST
-  object(#NEST)\armor = 1500
+  object(Str(#NEST))\id = #NEST
+  object()\armor = 1500
   MoveEntity(#NEST, 0, 0, 0, #PB_Local|#PB_Relative)
   createmat(#btex1, ?bug1, 16)
   setmat_basic(#btex1)
@@ -735,9 +739,10 @@ Procedure app_update()
     
     If MouseButton(#PB_MouseButton_Left) Or KeyboardPushed(#PB_Key_E)
       rayhitbool = RayCast(EntityX(#aim), 5000, EntityZ(#aim), 0 , -5000, 0, #MASK_GENERALPICKMASK)
+      a = Object(Str(rayhitbool))\id
       ;  If rayhitbool
       If IsEntity(rayhitbool)
-        If tank\box<5 And object(rayhitbool)\id = #BOX
+        If tank\box<5 And object()\id = #BOX
           If (EntityX(#HULL)-PickX())*(EntityX(#HULL)-PickX())+(EntityZ(#HULL)-PickZ())*(EntityZ(#HULL)-PickZ())<10000
             FreeEntity(rayhitbool)
             tank\box+1
@@ -747,10 +752,10 @@ Procedure app_update()
           
         ElseIf rayhitbool>= #RESS And rayhitbool<= #RESE And tank\box = 5
           PlaySound(empty)     
-         
-        ElseIf object(rayhitbool)\id = #EGGEMPTY
+          
+        ElseIf object()\id = #EGGEMPTY
           If (EntityX(#HULL)-PickX())*(EntityX(#HULL)-PickX())+(EntityZ(#HULL)-PickZ())*(EntityZ(#HULL)-PickZ())<10000
-            tank\armor +object(rayhitbool)\armor
+            tank\armor +object()\armor
             FreeEntity(rayhitbool)
             PlaySound(pickup)
           EndIf
@@ -766,13 +771,14 @@ Procedure app_update()
               tank\load+1
               If tank\load = 50
                 tank\won = #COLLECT_ALL
-                For x = 1 To 1000
-                  If object(x)\id = #BUG
-                    If IsEntity(x)
-                      FreeEntity(x)
-                    EndIf
+                ;  For x = 1 To 1000
+                If object()\id = #BUG
+                  x = Val(MapKey(object()))
+                  If IsEntity(x)
+                    FreeEntity(x)
                   EndIf
-                Next x
+                EndIf
+                ;  Next x
               EndIf
               PlaySound(pickup)
             EndIf
@@ -828,6 +834,7 @@ Procedure app_update()
         tank\ammo-1
         dist.f = Sqr((EntityX(#aim)+aoff-EntityX(#hull))  *   (EntityX(#aim)+aoff-EntityX(#hull))+((EntityZ(#aim)+boff-EntityZ(#hull))*(EntityZ(#aim)+boff-EntityZ(#hull))) )
         rayhitbool = RayCast(EntityX(#hull), 10, EntityZ(#hull), EntityDirectionX(#turr)*dist , 10, EntityDirectionZ(#turr)*dist, #MASK_GENERALPICKMASK)
+        a = object(Str(rayhitbool))\id
         If rayhitbool 
           If IsEntity(rayhitbool)
             distent.f = Sqr((EntityX(#hull)-EntityX(rayhitbool))  *   (EntityX(#hull)-EntityX(rayhitbool))+((EntityZ(#hull)-EntityZ(rayhitbool))*(EntityZ(#hull)-EntityZ(rayhitbool))) )
@@ -836,96 +843,116 @@ Procedure app_update()
               CreateLine3D(3000, EntityX(#hull), EntityY(#hull), EntityZ(#hull), RGBA(255, 0, 0, 50), PickX(), PickY(), PickZ(), RGB(255, 255, 127))
               hg2 = 1
               
-              If object(rayhitbool)\id = #EGGEMPTY
+              If object()\id = #EGGEMPTY
                 FreeEntity(rayhitbool)                   
-                PlaySound(crunch)            
-              ElseIf rayhitbool<#BGE
-                If object(rayhitbool)\id = #box
-                  ApplyEntityImpulse(rayhitbool, NormalX()*-50, 0, NormalZ()*-50)
-                Else
-                  ApplyEntityImpulse(rayhitbool, NormalX()*-15, 0, NormalZ()*-15)
-                EndIf
-                object(rayhitbool)\armor-(Random(tank\dmgmax, tank\dmgmin))
-                object(rayhitbool)\behavior = #b_attack
-                If object(rayhitbool)\armor<1
-                  If object(rayhitbool)\id = #box
-                    FreeEntity(rayhitbool)
-                    PlaySound(bcrunch)
-                  ElseIf object(rayhitbool)\id = #nest
-                    FreeEntity(rayhitbool)
-                    ticker::kill(1):ticker::kill(2):ticker::kill(3)
-                    For x = 1 To 1000
-                      If object(x)\id = #BUG
-                        If IsEntity(x)
-                          FreeEntity(x)
-                        EndIf
-                      EndIf
-                    Next x
-                    PlaySound(bcrunch)
-                    tank\won = #KILLED_NEST
-                  ElseIf object(rayhitbool)\id = #Egg
-                    SetEntityMaterial(rayhitbool, MaterialID(#box))
-                    StartDrawing(TextureOutput(layertexture))
-                    DrawingMode(#PB_2DDrawing_AlphaBlend)
-                    DrawAlphaImage(ImageID(eggdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
-                    StopDrawing()
-                    object(rayhitbool)\id = #box
-                    object(rayhitbool)\armor = 8
-                    ScaleEntity(rayhitbool, 0.5, 0.5, 0.5)
-                    EntityAngularFactor(rayhitbool, 0, 1, 0) 
-                    EntityLinearFactor(rayhitbool, 1, 0, 1) 
-                    PlaySound(crunch)
-                    spawnbug(Random(5, 0), PickX()-5, PickZ()-5, PickX()+5, PickZ()+5, 0, #b_attack)
-                    
-                    ;---  NEED   a object list!!!!       
-                    x = 1000
-                    CreateEntity(x, MeshID(#EGGEMPTY), MaterialID(#EGGEMPTY), EntityX(rayhitbool), 20, EntityZ(rayhitbool), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
-                    ScaleEntity(x, 2, 2, 2)
-                    object(x)\id = #EGGEMPTY
-                    object(x)\armor = 100+Random(100)
-                    CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(x, 0, Random(360), 0)
-                    EntityAngularFactor(x, 0, 0.025, 0)
-                    EntityLinearFactor(x, 0.025, 0, 0.025)
-                    SetEntityAttribute(x, #PB_Entity_AngularSleeping, 0.1)
-                    SetEntityAttribute(x, #PB_Entity_LinearSleeping, 1)
-                    SetEntityAttribute(x, #PB_Entity_MaxVelocity, 0)
-                    SetEntityAttribute(x, #PB_Entity_Friction, 10)  
-                    
-                    
-                  ElseIf object(rayhitbool)\id = #DEADBUG
-                    FreeEntity(rayhitbool)                   
-                    If tank\armor< tank\maxArmor                   
-                      tank\armor = object(x)\armor    
-                    EndIf
-                    ;tank\spentarmor+1
-                    PlaySound(pickup)           
-                    
-                    
-                    
-                  ElseIf object(rayhitbool)\id = #BUG
-                    StartDrawing(TextureOutput(layertexture))
-                    DrawingMode(#PB_2DDrawing_AlphaBlend)
-                    DrawAlphaImage(ImageID(bugdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
-                    StopDrawing()
-                    PlaySound(crunch)
-                    FreeEntity(rayhitbool)
-                    bugscount-1
-                    tank\kills+1
-                    
-                    ; Create a dead bug (gives energy)
-                    ;                     CreateEntity(rayhitbool, MeshID(#DEADBUG), MaterialID(#DEADBUG), EntityX(rayhitbool), 20, EntityZ(rayhitbool), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
-                    ;                     ScaleEntity(rayhitbool, 2, 2, 2)
-                    ;                     object(rayhitbool)\id = #DEADBUG
-                    ;                     object(rayhitbool)\armor = 0
-                    ;                     CreateEntityBody(rayhitbool, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(rayhitbool, 0, Random(360), 0)
-                    ;                     EntityAngularFactor(rayhitbool, 0, 0.025, 0)
-                    ;                     EntityLinearFactor(rayhitbool, 0.025, 0, 0.025)
-                    ;                     SetEntityAttribute(rayhitbool, #PB_Entity_AngularSleeping, 0.1)
-                    ;                     SetEntityAttribute(rayhitbool, #PB_Entity_LinearSleeping, 1)
-                    ;                     SetEntityAttribute(rayhitbool, #PB_Entity_MaxVelocity, 0)
-                    ;                     SetEntityAttribute(rayhitbool, #PB_Entity_Friction, 10)  
-                    
+                PlaySound(crunch) 
+              EndIf
+              If object()\id = #box
+                ApplyEntityImpulse(rayhitbool, NormalX()*-50, 0, NormalZ()*-50)
+              Else
+                ApplyEntityImpulse(rayhitbool, NormalX()*-15, 0, NormalZ()*-15)
+              EndIf
+              object()\armor-(Random(tank\dmgmax, tank\dmgmin))
+              object()\behavior = #b_attack
+              If object()\armor<1
+                PlaySound(bcrunch)
+                If object()\id = #box
+                  FreeEntity(rayhitbool)         
+                ElseIf object()\id = #nest
+                  FreeEntity(rayhitbool)
+                  ticker::kill(1):ticker::kill(2):ticker::kill(3)
+                  tank\won = #KILLED_NEST
+                ElseIf object()\id = #BUG
+                  x = Val(MapKey(object()))
+                  If IsEntity(x)                                   
+                    FreeEntity(x)
+                  EndIf              
+                ElseIf object()\id = #Egg
+                  SetEntityMaterial(rayhitbool, MaterialID(#box))
+                  StartDrawing(TextureOutput(layertexture))
+                  DrawingMode(#PB_2DDrawing_AlphaBlend)
+                  DrawAlphaImage(ImageID(eggdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
+                  StopDrawing()
+                  object()\id = #box
+                  object()\armor = 8
+                  ScaleEntity(rayhitbool, 0.5, 0.5, 0.5)
+                  EntityAngularFactor(rayhitbool, 0, 1, 0) 
+                  EntityLinearFactor(rayhitbool, 1, 0, 1) 
+                  spawnbug(Random(5, 0), PickX()-5, PickZ()-5, PickX()+5, PickZ()+5, 0, #b_attack)
+                  
+                  ;---  NEED   a object list!!!!       
+                  x = 1000
+                  CreateEntity(x, MeshID(#EGGEMPTY), MaterialID(#EGGEMPTY), EntityX(rayhitbool), 20, EntityZ(rayhitbool), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+                  ScaleEntity(x, 2, 2, 2)
+                  object(Str(x))\id = #EGGEMPTY
+                  object()\armor = 100+Random(100)
+                  CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(x, 0, Random(360), 0)
+                  EntityAngularFactor(x, 0, 0.025, 0)
+                  EntityLinearFactor(x, 0.025, 0, 0.025)
+                  SetEntityAttribute(x, #PB_Entity_AngularSleeping, 0.1)
+                  SetEntityAttribute(x, #PB_Entity_LinearSleeping, 1)
+                  SetEntityAttribute(x, #PB_Entity_MaxVelocity, 0)
+                  SetEntityAttribute(x, #PB_Entity_Friction, 10)  
+                  
+                  
+                  ;                   ElseIf object()\id = #DEADBUG
+                  ;                     FreeEntity(rayhitbool)                   
+                  ;                     If tank\armor< tank\maxArmor                   
+                  ;                       tank\armor = object()\armor    
+                  ;                     EndIf
+                  ;                     tank\spentarmor+1
+                  ;                     PlaySound(pickup)           
+                  
+                  
+                ElseIf object()\id = #BUG
+                  StartDrawing(TextureOutput(layertexture))
+                  DrawingMode(#PB_2DDrawing_AlphaBlend)
+                  DrawAlphaImage(ImageID(bugdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
+                  StopDrawing()
+                  PlaySound(crunch)
+                  ;     FreeEntity(rayhitbool)
+                  ;    bugscount-1
+                  ;-  Create a new bug
+                  ; The king is deaad... long live the king!
+                  
+                  tank\kills+1
+                  MoveEntity(rayhitbool, EntityX(#NEST), EntityY(#NEST), EntityZ(#NEST),#PB_Absolute)
+                  
+                  c = Random(big, 0)
+                  object()\t = -1
+                  If c = 1
+                    object()\armor = 50
+                    object()\ID = #BUG
+                    object()\spmax = 10+Random(20, 10)
+                    f.f = 1.5+Random(500)/1000
+                    ScaleEntity(rayhitbool, 2, 2, 2)
+                    object()\behavior = #b_Idle
+                    object()\aggrorange = 250000+Random(250000)
+                  Else
+                    object()\armor = 6
+                    object()\ID = #BUG
+                    object()\spmax = 60+Random(30, 10)
+                    f.f = 1.0+Random(100)/1000
+                    ScaleEntity(rayhitbool, f, f, f)
+                    object()\behavior = #b_Idle
+                    object()\aggrorange = 400000+Random(100000)
                   EndIf
+                  
+                  
+                  ; Create a dead bug (gives energy)
+                  ;                     CreateEntity(rayhitbool, MeshID(#DEADBUG), MaterialID(#DEADBUG), EntityX(rayhitbool), 20, EntityZ(rayhitbool), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+                  ;                     ScaleEntity(rayhitbool, 2, 2, 2)
+                  ;                     object(rayhitbool)\id = #DEADBUG
+                  ;                     object(rayhitbool)\armor = 0
+                  ;                     CreateEntityBody(rayhitbool, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(rayhitbool, 0, Random(360), 0)
+                  ;                     EntityAngularFactor(rayhitbool, 0, 0.025, 0)
+                  ;                     EntityLinearFactor(rayhitbool, 0.025, 0, 0.025)
+                  ;                     SetEntityAttribute(rayhitbool, #PB_Entity_AngularSleeping, 0.1)
+                  ;                     SetEntityAttribute(rayhitbool, #PB_Entity_LinearSleeping, 1)
+                  ;                     SetEntityAttribute(rayhitbool, #PB_Entity_MaxVelocity, 0)
+                  ;                     SetEntityAttribute(rayhitbool, #PB_Entity_Friction, 10)  
+                  
+                  ;         EndIf
                 EndIf
               EndIf
             Else
@@ -942,12 +969,13 @@ Procedure app_update()
         EndIf
       EndIf
     EndIf
+    
     If hg >0
       splashimage(holeimg, 512-((EntityX(#aim)+aoff)/10), 512-(EntityZ(#aim)+boff)/10, 128)
       hg = 0
     EndIf
     If hg2 >0
-      If object(rayhitbool)\id = #EGG Or object(rayhitbool)\id = #BUG Or object(rayhitbool)\id = #Nest
+      If object()\id = #EGG Or object()\id = #BUG Or object()\id = #Nest
         If IsEntity(rayhitbool)      
           splashimage(splatimg, 510-(EntityX(rayhitbool)/10), 510-EntityZ(rayhitbool)/10, 128)
         Else
@@ -966,10 +994,10 @@ Procedure app_update()
     StopSound(engine)
   EndIf
   If ticker::triggered(4) 
-    If object(#NEST)\armor<1000
+    If object(Str(#NEST))\armor<1000
       spawnbug(1, 0, 4550, 1, 4551, 1, #b_attack)
     EndIf
-    If object(#NEST)\armor<500
+    If object(Str(#NEST))\armor<500
       spawnbug(5, 3, 4550, 1, 4551, 0, #b_attack)
     EndIf
     If tank\ammo>500 And tank\load>25
@@ -1003,29 +1031,29 @@ Procedure app_update()
   EndIf
   For z = 1 To 2
     If bugswiper>#BGE : bugswiper = #BGS : EndIf : x = bugswiper
-    If IsEntity(x) And object(x)\id = #bug
-      If object(x)\behavior = #b_wonder
-        If object(x)\t = -1 
-          object(x)\t = 0 : object(x)\tx = Random(10000)-5000 : object(x)\ty = Random(10000)-5000
+    If IsEntity(x) And object(Str(x))\id = #bug
+      If object()\behavior = #b_wonder
+        If object()\t = -1 
+          object()\t = 0 : object()\tx = Random(10000)-5000 : object()\ty = Random(10000)-5000
         Else
-          If dist(EntityX(x), EntityZ(x), object(x)\tx, object(x)\ty)<10000
-            object(x)\t = -1
+          If dist(EntityX(x), EntityZ(x), object()\tx, object()\ty)<10000
+            object()\t = -1
           EndIf
-          If dist(EntityX(x), EntityZ(x), EntityX(#HULL), EntityZ(#HULL))<object(x)\aggrorange
-            object(x)\behavior = #b_attack
+          If dist(EntityX(x), EntityZ(x), EntityX(#HULL), EntityZ(#HULL))<object()\aggrorange
+            object()\behavior = #b_attack
             If SoundStatus(eat) = #PB_Sound_Stopped:PlaySound(eat):EndIf
           EndIf
         EndIf
       EndIf
-      If object(x)\behavior = #b_idle
-        If dist(EntityX(x), EntityZ(x), EntityX(#HULL), EntityZ(#HULL))<object(x)\aggrorange
-          object(x)\behavior = #b_attack
+      If object()\behavior = #b_idle
+        If dist(EntityX(x), EntityZ(x), EntityX(#HULL), EntityZ(#HULL))<object()\aggrorange
+          object()\behavior = #b_attack
           If SoundStatus(eat) = #PB_Sound_Stopped:PlaySound(eat):EndIf
         EndIf
       EndIf
-      If object(x)\behavior = #b_guard
-        If dist(EntityX(x), EntityZ(x), EntityX(#HULL), EntityZ(#HULL))<object(x)\aggrorange+500000
-          object(x)\behavior = #b_attack
+      If object()\behavior = #b_guard
+        If dist(EntityX(x), EntityZ(x), EntityX(#HULL), EntityZ(#HULL))<object()\aggrorange+500000
+          object()\behavior = #b_attack
           If SoundStatus(eat) = #PB_Sound_Stopped:PlaySound(eat):EndIf
         EndIf
       EndIf
@@ -1035,21 +1063,21 @@ Procedure app_update()
   ForEach bugs()
     If IsEntity(bugs())
       x = bugs()
-      If object(x)\behavior = #b_attack
+      If object(Str(x))\behavior = #b_attack
         EntityLookAt(x, EntityX(#hull), 20, EntityZ(#hull))
-        MoveEntity(x, 0, 0, -object(x)\spmax, #PB_Local|#PB_Relative)
-      ElseIf object(x)\behavior = #b_wonder
-        EntityLookAt(x, object(x)\tx, 20, object(x)\ty)
-        MoveEntity(x, 0, 0, -object(x)\spmax/2, #PB_Local|#PB_Relative)
-      ElseIf object(x)\behavior = #b_guard
-        EntityLookAt(x, object(x)\tx, 20, object(x)\ty)
+        MoveEntity(x, 0, 0, -object()\spmax, #PB_Local|#PB_Relative)
+      ElseIf object()\behavior = #b_wonder
+        EntityLookAt(x, object()\tx, 20, object()\ty)
+        MoveEntity(x, 0, 0, -object()\spmax/2, #PB_Local|#PB_Relative)
+      ElseIf object()\behavior = #b_guard
+        EntityLookAt(x, object()\tx, 20, object()\ty)
         MoveEntity(x, 0, 0, 0, #PB_Local|#PB_Relative)
       Else
         EntityLookAt(x, 0, 20, 0)
         MoveEntity(x, 0, 0, 0, #PB_Local|#PB_Relative)
       EndIf
       If EntityCollide(x, #HULL)
-        object(x)\behavior = #b_attack
+        object()\behavior = #b_attack
         tank\armor-Random(5, 1)
         If SoundStatus(eat) = #PB_Sound_Stopped
           PlaySound(eat)
@@ -1101,13 +1129,13 @@ Procedure app_update()
     petskii::ctobject(ScreenWidth()/2, 240, "You collected "+Str(tank\collected)+" crates, ", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 270, "You uploaded "+Str(tank\load)+" crates.", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 300, "You spent "+Str(tank\spentarmor)+" crates on armor and "+Str(tank\spentammo)+" on ammo.", c3, c2)
-    If object(#NEST)\armor>0
+    If object(Str(#NEST))\armor>0
       petskii::ctobject(ScreenWidth()/2, 330, "The Nest has been destroyed.", c3, c2)
     EndIf
     If mins = 0 And seconds = 0
       mins = (ElapsedMilliseconds()/1000)/60
       seconds = Mod(ElapsedMilliseconds()/1000, 60)
-      score = 5000+(tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(#NEST)\armor
+      score = 5000+(tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(Str(#NEST))\armor
     EndIf
     petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
@@ -1121,13 +1149,13 @@ Procedure app_update()
     petskii::ctobject(ScreenWidth()/2, 240, "You collected "+Str(tank\collected)+" crates, ", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 270, "You uploaded "+Str(tank\load)+" crates.", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 300, "You spent "+Str(tank\spentarmor)+" crates on armor and "+Str(tank\spentammo)+" on ammo.", c3, c2)
-    If object(#NEST)\armor>0
+    If object(Str(#NEST))\armor>0
       petskii::ctobject(ScreenWidth()/2, 330, "The Nest has not been destroyed.", RGB(255, 0, 0), c2)
     EndIf
     If mins = 0 And seconds = 0
       mins = (ElapsedMilliseconds()/1000)/60
       seconds = Mod(ElapsedMilliseconds()/1000, 60)
-      score = 5000+(tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(#NEST)\armor
+      score = 5000+(tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(Str(#NEST))\armor
     EndIf
     petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
@@ -1142,18 +1170,18 @@ Procedure app_update()
     petskii::ctobject(ScreenWidth()/2, 240, "You collected "+Str(tank\collected)+" crates, ", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 270, "You uploaded "+Str(tank\load)+" crates.", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 300, "You spent "+Str(tank\spentarmor)+" crates on armor and "+Str(tank\spentammo)+" on ammo.", c3, c2)
-    If object(#NEST)\armor>0
+    If object(Str(#NEST))\armor>0
       petskii::ctobject(ScreenWidth()/2, 330, "The nest has not been destroyed.", c3, c2)
     EndIf
     If mins = 0 And seconds = 0
       mins = (ElapsedMilliseconds()/1000)/60
       seconds = Mod(ElapsedMilliseconds()/1000, 60)
-      score = (tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(#NEST)\armor
+      score = (tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(Str(#NEST))\armor
     EndIf
     petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
   Else
-    petskii::textoutlined(0, 0, "NEST HEALTH : "+Str(object(#NEST)\armor)+"/1500", c1, c2)
+    petskii::textoutlined(0, 0, "NEST HEALTH : "+Str(object(Str(#NEST))\armor)+"/1500", c1, c2)
     petskii::textoutlined(0, 30, "AMMO : "+Str(tank\ammo), c1, c2)
     petskii::textoutlined(0, 60, "ARMOR : "+Str(tank\armor), c1, c2)
     petskii::textoutlined(0, 90, "LOAD : "+Str(tank\load)+"/50", c1, c2)
@@ -1275,8 +1303,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 792
-; FirstLine = 761
-; Folding = -------------------------
+; CursorPosition = 45
+; FirstLine = 12
+; Folding = ------------------------
 ; EnableXP
 ; DPIAware
