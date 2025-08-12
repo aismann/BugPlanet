@@ -965,12 +965,7 @@ Procedure app_update()
         hg = 0
       EndIf
       
-      
-      EntityVelocity(#hull, 0, 0, 0)
-      EntityAngularFactor(#hull, 0, 0, 0)
-      MoveEntity(#TURR, EntityX(#HULL), 61, EntityZ(#HULL), #PB_World|#PB_Absolute)
-      MoveCamera(#MAINCAMERA, EntityX(#HULL), CameraY(#MAINCAMERA), EntityZ(#HULL), #PB_World|#PB_Absolute)
-      StopSound(engine)
+
     EndIf
     
     
@@ -1340,8 +1335,8 @@ Procedure app_update()
     Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
   EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 860
-; FirstLine = 847
+; CursorPosition = 967
+; FirstLine = 952
 ; Folding = ------------------------
 ; EnableXP
 ; DPIAware
