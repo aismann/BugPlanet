@@ -136,6 +136,14 @@ Structure coord2d
 EndStructure
 
 ;- 4 Global variables
+Global p.pstruct
+p\ammo=450
+p\armor = 250
+p\box = 0
+p\dmgmin = 1
+p\dmgmax = 3
+p\load = 0
+
 Global tank.pstruct
 tank\ammo = 450
 tank\maxAmmo = 1000
@@ -842,6 +850,7 @@ Procedure app_update()
     
     
     
+    ;- #PB_MouseButton_Right
     If MouseButton(#PB_MouseButton_Right)
       If tank\ammo<=0 And SoundStatus(empty)<>#PB_Sound_Playing
         PlaySound(empty) 
@@ -852,6 +861,8 @@ Procedure app_update()
         
         aoff = Random(10)-5
         boff = Random(10)-5
+        p\fired+1
+        p\ammo-1
         tank\fired+1
         tank\ammo-1
         dist.f = Sqr((EntityX(#aim)+aoff-EntityX(#hull))  *   (EntityX(#aim)+aoff-EntityX(#hull))+((EntityZ(#aim)+boff-EntityZ(#hull))*(EntityZ(#aim)+boff-EntityZ(#hull))) )
@@ -872,97 +883,96 @@ Procedure app_update()
                 ApplyEntityImpulse(rayhitbool, NormalX()*-15, 0, NormalZ()*-15)
               EndIf
               
-              
-              
-              
-              ;               object()\armor-(Random(tank\dmgmax, tank\dmgmin))
-              ;               object()\behavior = #b_attack
-              ;               If object()\armor<1
-              ;                 PlaySound(bcrunch)
-              ;                 If object()\id = #box
-              ;                   FreeEntity(rayhitbool)   
-              ;                   DeleteMapElement(object(), Str(rayhitbool))
-              ;                 ElseIf object()\id = #nest
-              ;                   FreeEntity(rayhitbool)
-              ;                   DeleteMapElement(object(), Str(rayhitbool))
-              ;                   ticker::kill(1):ticker::kill(2):ticker::kill(3)
-              ;                   tank\won = #KILLED_NEST
-              
-              
-              
-              Select object()\id                 
-                Case #BOX, #EGG, #BUG         
-                  splashimage(splatimg,510-(EntityX(rayhitbool)/10),510-EntityZ(rayhitbool)/10,128)
-                Default
-                  splashimage(holeimg,512-((EntityX(#aim)+aoff)/10),512-(EntityZ(#aim)+boff)/10,128)
-              EndSelect
-              
-              Select object()\id                 
-                Case #BOX
-                  
-                Case #EGG
-                  SetEntityMaterial(rayhitbool, MaterialID(#box))
-                  StartDrawing(TextureOutput(layertexture))
-                  DrawingMode(#PB_2DDrawing_AlphaBlend)
-                  DrawAlphaImage(ImageID(eggdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
-                  StopDrawing()
-                  object()\id = #box
-                  object()\armor = 8
-                  ScaleEntity(rayhitbool, 0.5, 0.5, 0.5)
-                  EntityAngularFactor(rayhitbool, 0, 1, 0) 
-                  EntityLinearFactor(rayhitbool, 1, 0, 1) 
-                  spawnbug(Random(5, 0), PickX()-5, PickZ()-5, PickX()+5, PickZ()+5, 0, #b_attack)
-                  
-                  ;---  NEED   a object list!!!!       
-                  x = 1000
-                  CreateEntity(x, MeshID(#EGGEMPTY), MaterialID(#EGGEMPTY), EntityX(rayhitbool), 20, EntityZ(rayhitbool), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
-                  ScaleEntity(x, 2, 2, 2)
-                  object(Str(x))\id = #EGGEMPTY
-                  object()\armor = 100+Random(100)
-                  CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(x, 0, Random(360), 0)
-                  EntityAngularFactor(x, 0, 0.025, 0)
-                  EntityLinearFactor(x, 0.025, 0, 0.025)
-                  SetEntityAttribute(x, #PB_Entity_AngularSleeping, 0.1)
-                  SetEntityAttribute(x, #PB_Entity_LinearSleeping, 1)
-                  SetEntityAttribute(x, #PB_Entity_MaxVelocity, 0)
-                  SetEntityAttribute(x, #PB_Entity_Friction, 10)  
-                  
-                  
-                Case #BUG
-                  StartDrawing(TextureOutput(layertexture))
-                  DrawingMode(#PB_2DDrawing_AlphaBlend)
-                  DrawAlphaImage(ImageID(bugdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
-                  StopDrawing()
-                  PlaySound(crunch)
-                  tank\kills+1
-                  
-                  ; The king is deaad... long live the king!
-                  ;-  Create a new bug
-                  
-                  MoveEntity(rayhitbool, EntityX(#NEST), EntityY(#NEST), EntityZ(#NEST),#PB_Absolute)
-                  
-                  c = Random(big, 0)
-                  object()\t = -1
-                  If c = 1
-                    object()\armor = 50
-                    object()\ID = #BUG
-                    object()\spmax = 10+Random(20, 10)
-                    f.f = 1.5+Random(500)/1000
-                    ScaleEntity(rayhitbool, 2, 2, 2)
-                    object()\behavior = #b_Idle
-                    object()\aggrorange = 250000+Random(250000)
-                  Else
-                    object()\armor = 6
-                    object()\ID = #BUG
-                    object()\spmax = 60+Random(30, 10)
-                    f.f = 1.0+Random(100)/1000
-                    ScaleEntity(rayhitbool, f, f, f)
-                    object()\behavior = #b_Idle
-                    object()\aggrorange = 400000+Random(100000)
-                  EndIf
-                  ;       Default
-                  
-              EndSelect             
+              object()\armor-(Random(p\dmgmax,p\dmgmin))
+              object()\behavior=#b_attack
+              If object()\armor<1
+                Select object()\id                 
+                  Case #BOX, #EGG, #BUG         
+                    splashimage(splatimg,510-(EntityX(rayhitbool)/10),510-EntityZ(rayhitbool)/10,128)
+                  Default
+                    splashimage(holeimg,512-((EntityX(#aim)+aoff)/10),512-(EntityZ(#aim)+boff)/10,128)
+                EndSelect
+                
+                Select object()\id                 
+                  Case #BOX, #EGGEMPTY
+                    FreeEntity(rayhitbool)
+                    PlaySound(bcrunch)
+                    DeleteMapElement(object(), Str(rayhitbool))
+                    
+                  Case #EGGEMPTY
+                                    FreeEntity(rayhitbool)
+                    PlaySound(bcrunch)
+                    DeleteMapElement(object(), Str(rayhitbool))
+                  Case #NEST
+                    FreeEntity(rayhitbool)
+                    DeleteMapElement(object(), Str(rayhitbool))
+                    ticker::kill(1):ticker::kill(2):ticker::kill(3)
+                    tank\won = #KILLED_NEST
+                    
+                  Case #EGG
+                    SetEntityMaterial(rayhitbool, MaterialID(#box))
+                    StartDrawing(TextureOutput(layertexture))
+                    DrawingMode(#PB_2DDrawing_AlphaBlend)
+                    DrawAlphaImage(ImageID(eggdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
+                    StopDrawing()
+                    object()\id = #box
+                    object()\armor = 8
+                    ScaleEntity(rayhitbool, 0.5, 0.5, 0.5)
+                    EntityAngularFactor(rayhitbool, 0, 1, 0) 
+                    EntityLinearFactor(rayhitbool, 1, 0, 1) 
+                    spawnbug(Random(5, 0), PickX()-5, PickZ()-5, PickX()+5, PickZ()+5, 0, #b_attack)
+                    
+                    ;---  NEED   a object list!!!!       
+                    x = 1000
+                    CreateEntity(x, MeshID(#EGGEMPTY), MaterialID(#EGGEMPTY), EntityX(rayhitbool), 20, EntityZ(rayhitbool), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+                    ScaleEntity(x, 2, 2, 2)
+                    object(Str(x))\id = #EGGEMPTY
+                    object()\armor = 100+Random(100)
+                    CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(x, 0, Random(360), 0)
+                    EntityAngularFactor(x, 0, 0.025, 0)
+                    EntityLinearFactor(x, 0.025, 0, 0.025)
+                    SetEntityAttribute(x, #PB_Entity_AngularSleeping, 0.1)
+                    SetEntityAttribute(x, #PB_Entity_LinearSleeping, 1)
+                    SetEntityAttribute(x, #PB_Entity_MaxVelocity, 0)
+                    SetEntityAttribute(x, #PB_Entity_Friction, 10)  
+                    
+                    
+                  Case #BUG
+                    StartDrawing(TextureOutput(layertexture))
+                    DrawingMode(#PB_2DDrawing_AlphaBlend)
+                    DrawAlphaImage(ImageID(bugdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
+                    StopDrawing()
+                    PlaySound(crunch)
+                    tank\kills+1
+                    
+                    ; The king is deaad... long live the king!
+                    ;-  Create a new bug
+                    
+                    MoveEntity(rayhitbool, EntityX(#NEST), EntityY(#NEST), EntityZ(#NEST),#PB_Absolute)
+                    
+                    c = Random(big, 0)
+                    object()\t = -1
+                    If c = 1
+                      object()\armor = 50
+                      object()\ID = #BUG
+                      object()\spmax = 10+Random(20, 10)
+                      f.f = 1.5+Random(500)/1000
+                      ScaleEntity(rayhitbool, 2, 2, 2)
+                      object()\behavior = #b_Idle
+                      object()\aggrorange = 250000+Random(250000)
+                    Else
+                      object()\armor = 6
+                      object()\ID = #BUG
+                      object()\spmax = 60+Random(30, 10)
+                      f.f = 1.0+Random(100)/1000
+                      ScaleEntity(rayhitbool, f, f, f)
+                      object()\behavior = #b_Idle
+                      object()\aggrorange = 400000+Random(100000)
+                    EndIf
+                  Default
+                    
+                EndSelect 
+              EndIf
             EndIf
           EndIf  
         EndIf 
@@ -1290,8 +1300,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 1184
-; FirstLine = 718
+; CursorPosition = 886
+; FirstLine = 867
 ; Folding = -----------------------
 ; EnableXP
 ; DPIAware
