@@ -861,11 +861,11 @@ Procedure app_update()
             If Abs(distent)<Abs(dist)+distb
               CreateLine3D(3000, EntityX(#hull), EntityY(#hull), EntityZ(#hull), RGBA(255, 0, 0, 50), PickX(), PickY(), PickZ(), RGB(255, 255, 127))
               hg2 = 1
-              
-              If object()\id = #EGGEMPTY
-                FreeEntity(rayhitbool)                   
-                PlaySound(crunch) 
-              EndIf
+              ;               If object()\id = #EGGEMPTY
+              ;                  DeleteMapElement(object(), Str(rayhitbool))  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< needed!!!
+              ;                 FreeEntity(rayhitbool)                   
+              ;                 PlaySound(crunch) 
+              ;               Else
               If object()\id = #box
                 ApplyEntityImpulse(rayhitbool, NormalX()*-50, 0, NormalZ()*-50)
               Else
@@ -876,16 +876,19 @@ Procedure app_update()
               If object()\armor<1
                 PlaySound(bcrunch)
                 If object()\id = #box
-                  FreeEntity(rayhitbool)         
+                  FreeEntity(rayhitbool)   
+                  DeleteMapElement(object(), Str(rayhitbool))
                 ElseIf object()\id = #nest
                   FreeEntity(rayhitbool)
+                  DeleteMapElement(object(), Str(rayhitbool))
                   ticker::kill(1):ticker::kill(2):ticker::kill(3)
                   tank\won = #KILLED_NEST
-                ElseIf object()\id = #BUG
-                  x = Val(MapKey(object()))
-                  If IsEntity(x)                                   
-                    FreeEntity(x)
-                  EndIf              
+                  ;                 ElseIf object()\id = #BUG
+                  ;                   x = Val(MapKey(object()))
+                  ;                   If IsEntity(x)                                   
+                  ;                     FreeEntity(x)
+                  ;                                  DeleteMapElement(object(), Str(rayhitbool))
+                  ;                   EndIf              
                 ElseIf object()\id = #Egg
                   SetEntityMaterial(rayhitbool, MaterialID(#box))
                   StartDrawing(TextureOutput(layertexture))
@@ -975,17 +978,18 @@ Procedure app_update()
                 EndIf
               EndIf
               If hg2 >0
-                If object()\id = #EGG Or object()\id = #EGGEMPTY Or object()\id = #BUG Or object()\id = #Nest 
-                  If IsEntity(rayhitbool)      
-                    Debug "splashimage   t shown!!! rayhitbool no longer existing? :" + Str(rayhitbool)
-                    splashimage(splatimg, 510-(EntityX(rayhitbool)/10), 510-EntityZ(rayhitbool)/10, 128)
+                If  MapSize(object()) > 0
+                  If object()\id = #EGG Or object()\id = #EGGEMPTY Or object()\id = #BUG Or object()\id = #Nest 
+                    If IsEntity(rayhitbool)      
+                      splashimage(splatimg, 510-(EntityX(rayhitbool)/10), 510-EntityZ(rayhitbool)/10, 128)
+                    Else
+                      Debug "This line should not shown!!! rayhitbool no longer existing? :" + Str(rayhitbool)
+                    EndIf
                   Else
-                    Debug "This line should not shown!!! rayhitbool no longer existing? :" + Str(rayhitbool)
+                    splashimage(holeimg, 512-(PickX()/10), 512-PickZ()/10, 128)
                   EndIf
-                Else
-                  splashimage(holeimg, 512-(PickX()/10), 512-PickZ()/10, 128)
+                  hg2 = 0
                 EndIf
-                hg2 = 0
               EndIf
             Else
               CreateLine3D(3000, EntityX(#hull), EntityY(#hull), EntityZ(#hull), RGB(255, 0, 0), EntityX(#AIM)+aoff, EntityY(#AIM), EntityZ(#AIM)+boff, RGB(255, 255, 127))
@@ -1325,8 +1329,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 1325
-; FirstLine = 1285
+; CursorPosition = 1329
+; FirstLine = 1289
 ; Folding = ------------------------
 ; EnableXP
 ; DPIAware
