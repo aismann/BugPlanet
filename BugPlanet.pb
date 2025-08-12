@@ -68,7 +68,7 @@ InitSound()
 #TURR = 4
 #BOX = 5
 #AIM = 6
-#EGGEMPTY = 7
+#EGGHULL = 7
 #EGG = 8
 #AMMOPOD = 9
 #NEST = 12 
@@ -425,9 +425,7 @@ EndProcedure
 ;- 5.6 Sound stuff end
 
 Procedure spawnbug(num, x1, y1, x2, y2, big, behavior)
-  count = 0
-  For n = 1 To num
-    
+  For n = 1 To num 
     entity = CreateEntity(#PB_Any, MeshID(#box), MaterialID(#btex1), x1+Random(x2-x1), 20, y1+Random(y2-y1), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
     AddElement(bugs()) : bugs() = entity : bugscount+1
     c = Random(big, 0)
@@ -449,7 +447,6 @@ Procedure spawnbug(num, x1, y1, x2, y2, big, behavior)
       object()\behavior = behavior
       object()\aggrorange = 400000+Random(100000)
     EndIf
-    count+1
     CreateEntityBody(entity, #PB_Entity_BoxBody, 1, 1, 1)
     EntityAngularFactor(entity, 0, 1, 0)
     EntityLinearFactor(entity, 1, 0, 1)
@@ -567,9 +564,9 @@ Procedure app_start()
   setmat_basic(#EGG)
   CreateCube(#EGG, 40)
   
-  createmat(#EGGEMPTY, ?eggd, 16)
-  setmat_basic(#EGGEMPTY)
-  CreateCube(#EGGEMPTY, 40)
+  createmat(#EGGHULL, ?eggd, 16)
+  setmat_basic(#EGGHULL)
+  CreateCube(#EGGHULL, 40)
   
   createmat(#DEADBUG, ?deadbug, 16)
   setmat_basic(#DEADBUG)
@@ -780,7 +777,7 @@ Procedure app_update()
         ElseIf rayhitbool>= #RESS And rayhitbool<= #RESE And tank\box = 5
           PlaySound(empty)     
           
-        ElseIf object()\id = #EGGEMPTY
+        ElseIf object()\id = #EGGHULL
           If (EntityX(#HULL)-PickX())*(EntityX(#HULL)-PickX())+(EntityZ(#HULL)-PickZ())*(EntityZ(#HULL)-PickZ())<10000
             tank\armor +object()\armor
             FreeEntity(rayhitbool)
@@ -852,8 +849,10 @@ Procedure app_update()
     
     ;- #PB_MouseButton_Right
     If MouseButton(#PB_MouseButton_Right)
-      If tank\ammo<=0 And SoundStatus(empty)<>#PB_Sound_Playing
-        PlaySound(empty) 
+      If tank\ammo<=0 
+        If SoundStatus(empty)<>#PB_Sound_Playing
+          PlaySound(empty) 
+        EndIf  
       Else
         If SoundStatus(shot)<>#PB_Sound_Playing
           PlaySound(shot) 
@@ -863,17 +862,19 @@ Procedure app_update()
         boff = Random(10)-5
         p\fired+1
         p\ammo-1
-        tank\fired+1
-        tank\ammo-1
         dist.f = Sqr((EntityX(#aim)+aoff-EntityX(#hull))  *   (EntityX(#aim)+aoff-EntityX(#hull))+((EntityZ(#aim)+boff-EntityZ(#hull))*(EntityZ(#aim)+boff-EntityZ(#hull))) )
         rayhitbool = RayCast(EntityX(#hull), 10, EntityZ(#hull), EntityDirectionX(#turr)*dist , 10, EntityDirectionZ(#turr)*dist, #MASK_GENERALPICKMASK)
-        If rayhitbool 
+        If rayhitbool
           result = FindMapElement(object(), Str(rayhitbool))
           If result And IsEntity(rayhitbool)
             
             distent.f = Sqr((EntityX(#hull)-EntityX(rayhitbool))  *   (EntityX(#hull)-EntityX(rayhitbool))+((EntityZ(#hull)-EntityZ(rayhitbool))*(EntityZ(#hull)-EntityZ(rayhitbool))) )
-            If rayhitbool<651:distb = 25 :Else:distb = 100:EndIf ; <<<<<<<<<<<<<<<<  checken
-            
+;             If rayhitbool<651:    
+;               distb = 25 :
+;             Else:
+;               distb = 100:
+;             EndIf ; <<<<<<<<<<<<<<<<  checken
+             distb = 25: 
             If Abs(distent)<Abs(dist)+distb
               CreateLine3D(3000, EntityX(#hull), EntityY(#hull), EntityZ(#hull), RGBA(255, 0, 0, 50), PickX(), PickY(), PickZ(), RGB(255, 255, 127))
               
@@ -883,8 +884,10 @@ Procedure app_update()
                 ApplyEntityImpulse(rayhitbool, NormalX()*-15, 0, NormalZ()*-15)
               EndIf
               
-              object()\armor-(Random(p\dmgmax,p\dmgmin))
+              object()\armor-(Random(p\dmgmax,p\dmgmin))          
               object()\behavior=#b_attack
+                        
+              
               If object()\armor<1
                 Select object()\id                 
                   Case #BOX, #EGG, #BUG         
@@ -894,15 +897,11 @@ Procedure app_update()
                 EndSelect
                 
                 Select object()\id                 
-                  Case #BOX, #EGGEMPTY
+                  Case #BOX, #EGGHULL, 
                     FreeEntity(rayhitbool)
                     PlaySound(bcrunch)
                     DeleteMapElement(object(), Str(rayhitbool))
                     
-                  Case #EGGEMPTY
-                                    FreeEntity(rayhitbool)
-                    PlaySound(bcrunch)
-                    DeleteMapElement(object(), Str(rayhitbool))
                   Case #NEST
                     FreeEntity(rayhitbool)
                     DeleteMapElement(object(), Str(rayhitbool))
@@ -913,8 +912,13 @@ Procedure app_update()
                     SetEntityMaterial(rayhitbool, MaterialID(#box))
                     StartDrawing(TextureOutput(layertexture))
                     DrawingMode(#PB_2DDrawing_AlphaBlend)
-                    DrawAlphaImage(ImageID(eggdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
+                    If  IsEntity(rayhitbool)
+                      DrawAlphaImage(ImageID(eggdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
+                    EndIf
+                    
                     StopDrawing()
+                    
+                    ; create a box
                     object()\id = #box
                     object()\armor = 8
                     ScaleEntity(rayhitbool, 0.5, 0.5, 0.5)
@@ -922,20 +926,19 @@ Procedure app_update()
                     EntityLinearFactor(rayhitbool, 1, 0, 1) 
                     spawnbug(Random(5, 0), PickX()-5, PickZ()-5, PickX()+5, PickZ()+5, 0, #b_attack)
                     
-                    ;---  NEED   a object list!!!!       
-                    x = 1000
-                    CreateEntity(x, MeshID(#EGGEMPTY), MaterialID(#EGGEMPTY), EntityX(rayhitbool), 20, EntityZ(rayhitbool), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
-                    ScaleEntity(x, 2, 2, 2)
-                    object(Str(x))\id = #EGGEMPTY
+                    ; Create a egg hull
+                    egghull = 1000
+                    CreateEntity(egghull, MeshID(#EGGHULL), MaterialID(#EGGHULL), EntityX(rayhitbool), 20, EntityZ(rayhitbool), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+                    ScaleEntity(egghull, 2, 2, 2)
+                    object(Str(egghull))\id = #EGGHULL
                     object()\armor = 100+Random(100)
-                    CreateEntityBody(x, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(x, 0, Random(360), 0)
-                    EntityAngularFactor(x, 0, 0.025, 0)
-                    EntityLinearFactor(x, 0.025, 0, 0.025)
-                    SetEntityAttribute(x, #PB_Entity_AngularSleeping, 0.1)
-                    SetEntityAttribute(x, #PB_Entity_LinearSleeping, 1)
-                    SetEntityAttribute(x, #PB_Entity_MaxVelocity, 0)
-                    SetEntityAttribute(x, #PB_Entity_Friction, 10)  
-                    
+                    CreateEntityBody(egghull, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(egghull, 0, Random(360), 0)
+                    EntityAngularFactor(egghull, 0, 0.025, 0)
+                    EntityLinearFactor(egghull, 0.025, 0, 0.025)
+                    SetEntityAttribute(egghull, #PB_Entity_AngularSleeping, 0.1)
+                    SetEntityAttribute(egghull, #PB_Entity_LinearSleeping, 1)
+                    SetEntityAttribute(egghull, #PB_Entity_MaxVelocity, 0)
+                    SetEntityAttribute(egghull, #PB_Entity_Friction, 10)                     
                     
                   Case #BUG
                     StartDrawing(TextureOutput(layertexture))
@@ -946,8 +949,7 @@ Procedure app_update()
                     tank\kills+1
                     
                     ; The king is deaad... long live the king!
-                    ;-  Create a new bug
-                    
+                    ;-  Create a new bug              
                     MoveEntity(rayhitbool, EntityX(#NEST), EntityY(#NEST), EntityZ(#NEST),#PB_Absolute)
                     
                     c = Random(big, 0)
@@ -969,8 +971,8 @@ Procedure app_update()
                       object()\behavior = #b_Idle
                       object()\aggrorange = 400000+Random(100000)
                     EndIf
-                  Default
-                    
+                  Default       
+                    Debug "Not killed object()\ID " + Str(object()\ID)
                 EndSelect 
               EndIf
             EndIf
@@ -1300,8 +1302,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 886
-; FirstLine = 867
+; CursorPosition = 932
+; FirstLine = 892
 ; Folding = -----------------------
 ; EnableXP
 ; DPIAware
