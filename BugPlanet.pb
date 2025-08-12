@@ -889,6 +889,14 @@ Procedure app_update()
               ;                   tank\won = #KILLED_NEST
               
               
+              
+              Select object()\id                 
+                Case #BOX, #EGG, #BUG         
+                  splashimage(splatimg,510-(EntityX(rayhitbool)/10),510-EntityZ(rayhitbool)/10,128)
+                Default
+                  splashimage(holeimg,512-((EntityX(#aim)+aoff)/10),512-(EntityZ(#aim)+boff)/10,128)
+              EndSelect
+              
               Select object()\id                 
                 Case #BOX
                   
@@ -926,12 +934,11 @@ Procedure app_update()
                   DrawAlphaImage(ImageID(bugdimg), 506-(EntityX(rayhitbool)/10), 506-EntityZ(rayhitbool)/10, 156)
                   StopDrawing()
                   PlaySound(crunch)
-                  ;     FreeEntity(rayhitbool)
-                  ;    bugscount-1
-                  ;-  Create a new bug
-                  ; The king is deaad... long live the king!
-                  
                   tank\kills+1
+                  
+                  ; The king is deaad... long live the king!
+                  ;-  Create a new bug
+                  
                   MoveEntity(rayhitbool, EntityX(#NEST), EntityY(#NEST), EntityZ(#NEST),#PB_Absolute)
                   
                   c = Random(big, 0)
@@ -953,41 +960,16 @@ Procedure app_update()
                     object()\behavior = #b_Idle
                     object()\aggrorange = 400000+Random(100000)
                   EndIf
+                  ;       Default
                   
               EndSelect             
             EndIf
           EndIf  
         EndIf 
       EndIf
-      
-      If hg >0
-        splashimage(holeimg, 512-((EntityX(#aim)+aoff)/10), 512-(EntityZ(#aim)+boff)/10, 128)
-        hg = 0
-      EndIf
-      
-      
-    EndIf
-    
-    
-    
-    If hg >0
       splashimage(holeimg,512-((EntityX(#aim)+aoff)/10),512-(EntityZ(#aim)+boff)/10,128)
-      hg=0
-    EndIf
-    
-    If hg2 >0
       
-      ;       If object(rayhitbool)\id=#EGG Or object(rayhitbool)\id=#BUG Or object(rayhitbool)\id=#Nest
-      ;         If IsEntity(rayhitbool)      
-      ;           splashimage(splatimg,510-(EntityX(rayhitbool)/10),510-EntityZ(rayhitbool)/10,128)
-      ;         Else
-      ;           Debug "This line should not shown!!! rayhitbool no longer existing? :" + Str(rayhitbool)
-      ;         EndIf
-      ;         
-      ;       Else
-      ;         splashimage(holeimg,512-(PickX()/10),512-PickZ()/10,128)
-      ;       EndIf
-      hg2=0
+      
     EndIf
   Else
     EntityVelocity(#hull,0,0,0)
@@ -1202,33 +1184,6 @@ Procedure app_update()
   Delay(#MAINLOOP_DELAY)  
 EndProcedure
 
-
-If hg >0
-  splashimage(holeimg,512-((EntityX(#aim)+aoff)/10),512-(EntityZ(#aim)+boff)/10,128)
-  hg=0
-EndIf
-
-If hg2 >0
-  
-  ;     If object(rayhitbool)\id=#EGG Or object(rayhitbool)\id=#BUG Or object(rayhitbool)\id=#Nest
-  ;       If IsEntity(rayhitbool)      
-  ;         splashimage(splatimg,510-(EntityX(rayhitbool)/10),510-EntityZ(rayhitbool)/10,128)
-  ;       Else
-  ;         Debug "This line should not shown!!! rayhitbool no longer existing? :" + Str(rayhitbool)
-  ;       EndIf
-  ;       
-  ;     Else
-  ;       splashimage(holeimg,512-(PickX()/10),512-PickZ()/10,128)
-  ;     EndIf
-  hg2=0
-  
-  EntityVelocity(#hull,0,0,0)
-  EntityAngularFactor(#hull,0,0,0)
-  MoveEntity(#TURR,EntityX(#HULL),61,EntityZ(#HULL),#PB_World|#PB_Absolute)
-  MoveCamera(#MAINCAMERA,EntityX(#HULL),CameraY(#MAINCAMERA),EntityZ(#HULL),#PB_World|#PB_Absolute)
-  StopSound(engine)
-EndIf
-
 ;- 6 main
 app_start()
 Repeat
@@ -1335,8 +1290,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 1257
-; FirstLine = 1181
-; Folding = ------------------------
+; CursorPosition = 1184
+; FirstLine = 718
+; Folding = -----------------------
 ; EnableXP
 ; DPIAware
