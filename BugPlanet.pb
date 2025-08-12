@@ -62,6 +62,7 @@ InitSound()
 #RENDERWIDTH  = 640
 #RENDERHEIGHT = 480
 
+#HOUSE = 1
 #GROUND = 2
 #HULL = 3
 #TURR = 4
@@ -575,7 +576,7 @@ Procedure app_start()
   ; generate the objects 
   For x = #RESS To #RESE
     test = Random(4, 1)
-    If test = 4
+    If test = 4  ;box
       entity = CreateEntity(#PB_Any, MeshID(#BOX), MaterialID(#BOX), -5000+Random(10000), 20, -5000+Random(10000), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
       EntityRenderMode(entity, #PB_Entity_DisplaySkeleton )
       object(Str(entity))\id = #BOX
@@ -586,7 +587,7 @@ Procedure app_start()
       SetEntityAttribute(entity, #PB_Entity_AngularSleeping, 10)
       SetEntityAttribute(entity, #PB_Entity_LinearSleeping, 10)
       SetEntityAttribute(entity, #PB_Entity_MaxVelocity, 20)
-    Else
+    Else  ;egg
       entity = CreateEntity(#PB_Any, MeshID(#EGG), MaterialID(#EGG), -5000+Random(10000), 20, -5000+Random(10000), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
       ScaleEntity(entity, 2, 2, 2)
       object(Str(entity))\id = #EGG
@@ -638,6 +639,22 @@ Procedure app_start()
   MoveEntity( #WALL_ABOVE, 5012.5, 25, 0, #PB_World|#PB_Absolute)
   CreateEntityBody( #WALL_ABOVE, #PB_Entity_StaticBody, 1, 1, 1) 
   object(Str(#WALL_ABOVE))\id = #WALL
+  
+  ;- house
+  ;   createmat(#HOUSE, ?wall, 16)
+  ;   setmat_basic(#HOUSE)
+  ;   CreateCube(#HOUSE, 50)
+  ;   CreateEntity(#HOUSE, MeshID(#HOUSE), MaterialID(#HOUSE), 0, 0, 0, #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+  ;   CreateEntityBody(#HOUSE,  #PB_Entity_StaticBody, 1, 1, 1) 
+  ;   MoveEntity(#HOUSE, 0, -100, 4500, #PB_World|#PB_Absolute)
+  ;   EntityAngularFactor(#HOUSE, 0, 0, 0)
+  ;   EntityLinearFactor(#HOUSE, 0, 0, 0)
+  ;   object(Str(#HOUSE))\id = #HOUSE
+  ;   object()\armor = 1500
+  ;   MoveEntity(#HOUSE, 100, 0, 100, #PB_Local|#PB_Relative)
+  ;    ScaleEntity(#HOUSE, 2, 2, 2)
+  ;   
+  
   createmat(#NEST, ?nest, 16)
   setmat_basic(#NEST)
   CreateCube(#NEST, 300)
@@ -649,10 +666,12 @@ Procedure app_start()
   object(Str(#NEST))\id = #NEST
   object()\armor = 1500
   MoveEntity(#NEST, 0, 0, 0, #PB_Local|#PB_Relative)
+  
   createmat(#btex1, ?bug1, 16)
   setmat_basic(#btex1)
   createmat(#btex2, ?bug2, 16)
   setmat_basic(#btex2)
+  
   createmat(#AIM, ?aim, 16)
   setmat_basic(#AIM)
   CreateCube(#AIM, 50)
@@ -955,10 +974,24 @@ Procedure app_update()
                   ;         EndIf
                 EndIf
               EndIf
+              If hg2 >0
+                If object()\id = #EGG Or object()\id = #EGGEMPTY Or object()\id = #BUG Or object()\id = #Nest 
+                  If IsEntity(rayhitbool)      
+                    Debug "splashimage   t shown!!! rayhitbool no longer existing? :" + Str(rayhitbool)
+                    splashimage(splatimg, 510-(EntityX(rayhitbool)/10), 510-EntityZ(rayhitbool)/10, 128)
+                  Else
+                    Debug "This line should not shown!!! rayhitbool no longer existing? :" + Str(rayhitbool)
+                  EndIf
+                Else
+                  splashimage(holeimg, 512-(PickX()/10), 512-PickZ()/10, 128)
+                EndIf
+                hg2 = 0
+              EndIf
             Else
               CreateLine3D(3000, EntityX(#hull), EntityY(#hull), EntityZ(#hull), RGB(255, 0, 0), EntityX(#AIM)+aoff, EntityY(#AIM), EntityZ(#AIM)+boff, RGB(255, 255, 127))
               hg = 1
             EndIf
+            
           Else
             CreateLine3D(3000, EntityX(#hull), EntityY(#hull), EntityZ(#hull), RGB(255, 0, 0), EntityX(#AIM)+aoff, EntityY(#AIM), EntityZ(#AIM)+boff, RGB(255, 255, 127))
             hg = 1
@@ -974,18 +1007,7 @@ Procedure app_update()
       splashimage(holeimg, 512-((EntityX(#aim)+aoff)/10), 512-(EntityZ(#aim)+boff)/10, 128)
       hg = 0
     EndIf
-    If hg2 >0
-      If object()\id = #EGG Or object()\id = #BUG Or object()\id = #Nest
-        If IsEntity(rayhitbool)      
-          splashimage(splatimg, 510-(EntityX(rayhitbool)/10), 510-EntityZ(rayhitbool)/10, 128)
-        Else
-          Debug "This line should not shown!!! rayhitbool no longer existing? :" + Str(rayhitbool)
-        EndIf
-      Else
-        splashimage(holeimg, 512-(PickX()/10), 512-PickZ()/10, 128)
-      EndIf
-      hg2 = 0
-    EndIf
+    
   Else
     EntityVelocity(#hull, 0, 0, 0)
     EntityAngularFactor(#hull, 0, 0, 0)
@@ -1303,8 +1325,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 45
-; FirstLine = 12
+; CursorPosition = 1325
+; FirstLine = 1285
 ; Folding = ------------------------
 ; EnableXP
 ; DPIAware
