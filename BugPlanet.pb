@@ -902,7 +902,7 @@ Procedure app_update()
             ;             Else:
             ;               distb = 100:
             ;             EndIf ; <<<<<<<<<<<<<<<<  checken
-            distb = 25: 
+            distb = 250: 
             If Abs(distent)<Abs(dist)+distb
               CreateLine3D(3000, EntityX(#HULL), EntityY(#HULL), EntityZ(#HULL), RGBA(255, 0, 0, 50), PickX(), PickY(), PickZ(), RGB(255, 255, 127))
               
@@ -927,7 +927,7 @@ Procedure app_update()
                 Select object()\id                 
                   Case #BOX, #EGGHULL
 
-                       FreeEntity(rayhitbool)
+                    FreeEntity(rayhitbool)
                     PlaySound(bcrunch)
                     DeleteMapElement(object(), Str(rayhitbool))
                     
@@ -958,7 +958,7 @@ Procedure app_update()
                     ; Create a egg hull
                     egghull = 1000
                     CreateEntity(egghull, MeshID(#EGGHULL), MaterialID(#EGGHULL), EntityX(rayhitbool), 20, EntityZ(rayhitbool), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
-                    ScaleEntity(egghull, 2, 2, 2)
+                    ScaleEntity(egghull, 2, 1.1, 2)
                     object(Str(egghull))\id = #EGGHULL
                     object()\armor = 100+Random(100)
                     CreateEntityBody(egghull, #PB_Entity_BoxBody, 1, 1, 10) : RotateEntity(egghull, 0, Random(360), 0)
@@ -1280,8 +1280,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 692
-; FirstLine = 680
+; CursorPosition = 904
+; FirstLine = 887
 ; Folding = -----------------------
 ; EnableXP
 ; DPIAware
