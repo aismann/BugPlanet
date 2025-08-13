@@ -528,6 +528,7 @@ Procedure app_start()
   CreatePlane(#GROUND, 10240, 10240, 1, 1, 1, 1)
   CreateEntity(#GROUND, MeshID(#GROUND), MaterialID(#GROUND), 0, 0, 0, #MASK_NOPICKMASK, #MASK_MAINCAMERA)
   CreateEntityBody(#GROUND, #PB_Entity_StaticBody, 1, 1, 1)
+  
   MoveCamera(#MAINCAMERA, 0, 3000, 0, #PB_World|#PB_Absolute)
   CameraLookAt(#MAINCAMERA, EntityX(#GROUND), EntityY(#GROUND), EntityZ(#GROUND))
   
@@ -689,7 +690,7 @@ Procedure app_start()
   aim\x = 0 : aim\y = 250 : aim\z = 0
   CreateLight(0, RGB(255, 255, 255), 0, 0, 0, #PB_Light_Directional)
   LightDirection(0, -1, -2, -1)
-  ;WorldDebug(#PB_World_DebugBody  )
+  WorldDebug(#PB_World_DebugBody  )
   ticker::create(1, 500)
   ticker::create(2, 200)
   ticker::create(3, 15000)
@@ -738,7 +739,7 @@ Procedure InfoScreen(c3, c2, text1.s, text2.s)
     EndIf
     petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
-  EndProcedure
+EndProcedure
 
 Procedure app_update()
   Protected w_event.i
@@ -1278,8 +1279,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 1156
-; FirstLine = 1152
+; CursorPosition = 431
+; FirstLine = 428
 ; Folding = -----------------------
 ; EnableXP
 ; DPIAware
