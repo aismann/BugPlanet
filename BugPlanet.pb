@@ -897,12 +897,7 @@ Procedure app_update()
             ; If result 
             
             distent.f = Sqr((EntityX(#HULL)-EntityX(rayhitbool))  *   (EntityX(#HULL)-EntityX(rayhitbool))+((EntityZ(#HULL)-EntityZ(rayhitbool))*(EntityZ(#HULL)-EntityZ(rayhitbool))) )
-            ;             If rayhitbool<651:    
-            ;               distb = 25 :
-            ;             Else:
-            ;               distb = 100:
-            ;             EndIf ; <<<<<<<<<<<<<<<<  checken
-            distb = 250: 
+            distb = 25: 
             If Abs(distent)<Abs(dist)+distb
               CreateLine3D(3000, EntityX(#HULL), EntityY(#HULL), EntityZ(#HULL), RGBA(255, 0, 0, 50), PickX(), PickY(), PickZ(), RGB(255, 255, 127))
               
@@ -1280,8 +1275,9 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 904
-; FirstLine = 887
+; CursorPosition = 897
+; FirstLine = 878
 ; Folding = -----------------------
 ; EnableXP
 ; DPIAware
+; DisableDebugger
