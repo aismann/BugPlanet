@@ -720,7 +720,7 @@ Procedure splashimage(img, x, y, a)
   StopDrawing()
 EndProcedure
 
-Procedure InfoScreen(c3, c3, text1, text2)
+Procedure InfoScreen(c3, c2, text1.s, text2.s)
     petskii::ctobject(ScreenWidth()/2, 100, text1, c3, c2)
     petskii::ctobject(ScreenWidth()/2, 150, "You fired "+Str(tank\fired)+" shots.", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 180, "You killed "+Str(tank\kills)+" bugs.", c3, c2)
@@ -738,8 +738,6 @@ Procedure InfoScreen(c3, c3, text1, text2)
     EndIf
     petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
     petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
-  EndIf
-  
   EndProcedure
 
 Procedure app_update()
@@ -1156,7 +1154,7 @@ Procedure app_update()
   EndIf
   If tank\armor <= 0 And tank\won = 0
     tank\armor = 0
-    InfoScreen(RGB(255, 0, 0), c2, DEVOURED, "The Nest has not been destroyed.")
+    InfoScreen(RGB(255, 0, 0), c2, "DEVOURED", "The Nest has Not been destroyed.")
   Else
     petskii::textoutlined(0, 0, "NEST HEALTH : "+Str(object(Str(#NEST))\armor)+"/1500", c1, c2)
     petskii::textoutlined(0, 30, "AMMO : "+Str(tank\ammo), c1, c2)
@@ -1280,8 +1278,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 1158
-; FirstLine = 1140
+; CursorPosition = 1156
+; FirstLine = 1152
 ; Folding = -----------------------
 ; EnableXP
 ; DPIAware
