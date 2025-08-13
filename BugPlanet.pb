@@ -62,39 +62,44 @@ InitSound()
 #RENDERWIDTH  = 640
 #RENDERHEIGHT = 480
 
-#HOUSE = 1
-#GROUND = 2
-#HULL = 3
-#TURR = 4
-#BOX = 5
-#AIM = 6
-#EGGHULL = 7
-#EGG = 8
-#AMMOPOD = 9
-#NEST = 12 
-#btex1 = 13
-#btex2 = 14
-#BUG = 15
-#DEADBUG = 16
-#REP = 20
-#HELI = 21
+Enumeration 
+  #HOUSE 
+  #GROUND 
+  #HULL
+  #TURR 
+  #BOX 
+  #AIM 
+  #EGGHULL 
+  #EGG 
+  #AMMOPOD 
+  #NEST
+  #BUG
+  #DEADBUG 
+  #REP
+  #HELI 
+  #WALL
+  #BTEX1 
+  #BTEX2 
+EndEnumeration
+#WALL_RIGHT = 226
+#WALL_LEFT = 227
+#WALL_BELOW = 228
+#WALL_ABOVE = 229
+
+
+Enumeration  AntBehavior
+  #b_Idle
+  #b_attack
+  #b_wonder
+  #b_guard
+EndEnumeration
+
 #RESS = 100
 #RESE = 500
 #BGS = 800
 #BGE = 999
 #MAXDIST = 1000
 
-; Ant behavior
-#b_Idle = 0
-#b_attack = 1
-#b_wonder = 2
-#b_guard = 3
-
-#WALL = 30
-#WALL_RIGHT = 226
-#WALL_LEFT = 227
-#WALL_BELOW = 228
-#WALL_ABOVE = 229
 #KILLED_NEST= 1
 #COLLECT_ALL =2
 
@@ -426,7 +431,7 @@ EndProcedure
 
 Procedure spawnbug(num, x1, y1, x2, y2, big, behavior)
   For n = 1 To num 
-    entity = CreateEntity(#PB_Any, MeshID(#box), MaterialID(#btex1), x1+Random(x2-x1), 20, y1+Random(y2-y1), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
+    entity = CreateEntity(#PB_Any, MeshID(#box), MaterialID(#BTEX1), x1+Random(x2-x1), 20, y1+Random(y2-y1), #MASK_GENERALPICKMASK, #MASK_MAINCAMERA)
     AddElement(bugs()) : bugs() = entity : bugscount+1
     c = Random(big, 0)
     object(Str(entity))\t = -1
@@ -517,8 +522,8 @@ Procedure app_start()
   Box(0, 0, OutputWidth(), OutputHeight(), RGBA(0, 0, 0, 0))
   StopDrawing()
   
-  createmat(#ground, ?ground, 16)
-  AddMaterialLayer(#ground, TextureID(layertexture), #PB_Material_AlphaBlend)
+  createmat(#GROUND, ?ground, 16)
+  AddMaterialLayer(#GROUND, TextureID(layertexture), #PB_Material_AlphaBlend)
   ScaleMaterial(#GROUND, 0.01, 0.01, 0)
   CreatePlane(#GROUND, 10240, 10240, 1, 1, 1, 1)
   CreateEntity(#GROUND, MeshID(#GROUND), MaterialID(#GROUND), 0, 0, 0, #MASK_NOPICKMASK, #MASK_MAINCAMERA)
@@ -672,10 +677,10 @@ Procedure app_start()
   object()\armor = 1500
   MoveEntity(#NEST, 0, 0, 0, #PB_Local|#PB_Relative)
   
-  createmat(#btex1, ?bug1, 16)
-  setmat_basic(#btex1)
-  createmat(#btex2, ?bug2, 16)
-  setmat_basic(#btex2)
+  createmat(#BTEX1, ?bug1, 16)
+  setmat_basic(#BTEX1)
+  createmat(#BTEX2, ?bug2, 16)
+  setmat_basic(#BTEX2)
   
   createmat(#AIM, ?aim, 16)
   setmat_basic(#AIM)
@@ -715,6 +720,28 @@ Procedure splashimage(img, x, y, a)
   StopDrawing()
 EndProcedure
 
+Procedure InfoScreen(c3, c3, text1, text2)
+    petskii::ctobject(ScreenWidth()/2, 100, text1, c3, c2)
+    petskii::ctobject(ScreenWidth()/2, 150, "You fired "+Str(tank\fired)+" shots.", c3, c2)
+    petskii::ctobject(ScreenWidth()/2, 180, "You killed "+Str(tank\kills)+" bugs.", c3, c2)
+    petskii::ctobject(ScreenWidth()/2, 210, "You accidentally destroyed "+Str(tank\boxdestroyed)+" crates.", c3, c2)
+    petskii::ctobject(ScreenWidth()/2, 240, "You collected "+Str(tank\collected)+" crates, ", c3, c2)
+    petskii::ctobject(ScreenWidth()/2, 270, "You uploaded "+Str(tank\load)+" crates.", c3, c2)
+    petskii::ctobject(ScreenWidth()/2, 300, "You spent "+Str(tank\spentarmor)+" crates on armor and "+Str(tank\spentammo)+" on ammo.", c3, c2)
+    If object(Str(#NEST))\armor>0
+      petskii::ctobject(ScreenWidth()/2, 330, text2, c3, c2)
+    EndIf
+    If mins = 0 And seconds = 0
+      mins = (ElapsedMilliseconds()/1000)/60
+      seconds = Mod(ElapsedMilliseconds()/1000, 60)
+      score = 5000+(tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(Str(#NEST))\armor
+    EndIf
+    petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
+    petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
+  EndIf
+  
+  EndProcedure
+
 Procedure app_update()
   Protected w_event.i
   Repeat 
@@ -723,12 +750,12 @@ Procedure app_update()
   ExamineKeyboard():ExamineMouse()
   aim\x = aim\x-(MouseDeltaX()*0.5)
   aim\z = aim\z-(MouseDeltaY()*0.5)
-  If aim\x>EntityX(#turr)+#MAXDIST : aim\x = EntityX(#turr)+#MAXDIST : EndIf
-  If aim\x<EntityX(#turr)-#MAXDIST : aim\x = EntityX(#turr)-#MAXDIST : EndIf
-  If aim\z>EntityZ(#turr)+#MAXDIST : aim\z = EntityZ(#turr)+ #MAXDIST : EndIf
-  If aim\z<EntityZ(#turr)-#MAXDIST : aim\z = EntityZ(#turr)-#MAXDIST : EndIf
+  If aim\x>EntityX(#TURR)+#MAXDIST : aim\x = EntityX(#TURR)+#MAXDIST : EndIf
+  If aim\x<EntityX(#TURR)-#MAXDIST : aim\x = EntityX(#TURR)-#MAXDIST : EndIf
+  If aim\z>EntityZ(#TURR)+#MAXDIST : aim\z = EntityZ(#TURR)+ #MAXDIST : EndIf
+  If aim\z<EntityZ(#TURR)-#MAXDIST : aim\z = EntityZ(#TURR)-#MAXDIST : EndIf
   If tank\armor>0 And tank\won = 0
-    MoveCamera(#MAINCAMERA, CameraX(#MAINCAMERA)*0.9+EntityX(#aim)*0.1, CameraY(#MAINCAMERA), CameraZ(#MAINCAMERA)*0.9+EntityZ(#aim)*0.1, #PB_World|#PB_Absolute)
+    MoveCamera(#MAINCAMERA, CameraX(#MAINCAMERA)*0.9+EntityX(#AIM)*0.1, CameraY(#MAINCAMERA), CameraZ(#MAINCAMERA)*0.9+EntityZ(#AIM)*0.1, #PB_World|#PB_Absolute)
     MoveEntity(#AIM, aim\x, aim\y, aim\z, #PB_Absolute|#PB_World)
     EntityLookAt(#TURR, EntityX(#AIM), EntityY(#TURR), EntityZ(#AIM))
     If KeyboardPushed(#PB_Key_A) Or KeyboardPushed(#PB_Key_D) Or KeyboardPushed(#PB_Key_Right) Or KeyboardPushed(#PB_Key_Left)
@@ -757,7 +784,7 @@ Procedure app_update()
       MoveEntity(#HULL, 0, 0, tsp, #PB_Local|#PB_Relative)
       SetSoundFrequency(engine, 5000+Abs(tsp)*10)
     Else
-      EntityVelocity(#hull, 0, 0, 0)
+      EntityVelocity(#HULL, 0, 0, 0)
     EndIf
     MoveEntity(#TURR, EntityX(#HULL), 61, EntityZ(#HULL), #PB_World|#PB_Absolute)
     
@@ -788,8 +815,8 @@ Procedure app_update()
       ; EndIf
       If rayhitbool = -1  
         
-        If EntityX(#aim) >- 100 And EntityX(#aim)<100 And EntityX(#hull) >- 100 And EntityX(#hull)<100
-          If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
+        If EntityX(#AIM) >- 100 And EntityX(#AIM)<100 And EntityX(#HULL) >- 100 And EntityX(#HULL)<100
+          If EntityZ(#AIM) >- 100 And EntityZ(#AIM)<100 And EntityZ(#HULL) >- 100 And EntityZ(#HULL)<100
             If tank\box>0 And tank\load<50 And ticker::triggered(1)
               tank\box-1
               tank\load+1
@@ -808,8 +835,8 @@ Procedure app_update()
             EndIf
           EndIf
         EndIf
-        If EntityX(#aim)>184 And EntityX(#aim)<406 And EntityX(#hull)>184 And EntityX(#hull)<406
-          If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
+        If EntityX(#aim)>184 And EntityX(#aim)<406 And EntityX(#HULL)>184 And EntityX(#HULL)<406
+          If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#HULL) >- 100 And EntityZ(#HULL)<100
             If tank\box>0 And tank\armor<tank\maxArmor And ticker::triggered(1)                         
               tank\box-1
               tank\armor+25                     
@@ -818,8 +845,8 @@ Procedure app_update()
             EndIf
           EndIf
         EndIf
-        If EntityX(#aim) >- 400 And EntityX(#aim)<-200 And EntityX(#hull) >- 400 And EntityX(#hull)<-200
-          If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#hull) >- 100 And EntityZ(#hull)<100
+        If EntityX(#aim) >- 400 And EntityX(#aim)<-200 And EntityX(#HULL) >- 400 And EntityX(#HULL)<-200
+          If EntityZ(#aim) >- 100 And EntityZ(#aim)<100 And EntityZ(#HULL) >- 100 And EntityZ(#HULL)<100
             If tank\box>0 And tank\ammo<tank\maxAmmo And ticker::triggered(1)                         
               tank\box-1
               tank\ammo+50
@@ -832,14 +859,14 @@ Procedure app_update()
     EndIf
     
     If KeyboardPushed(#PB_Key_H) ; show homebase
-      CreateLine3D(3000, EntityX(#hull), EntityY(#hull), EntityZ(#hull), RGB(200, 255, 200), 0, 0, 0, RGB(200, 55, 200))
+      CreateLine3D(3000, EntityX(#HULL), EntityY(#HULL), EntityZ(#HULL), RGB(200, 255, 200), 0, 0, 0, RGB(200, 55, 200))
     EndIf
     
     ;     If KeyboardPushed(#PB_Key_M) ; show map
     ;       For x = #RESS To #RESE
     ;         If object(x)\id = #BOX
     ;           If IsEntity(x)
-    ;             CreateLine3D(3300, EntityX(x)-2, EntityY(#hull), EntityZ(x)-2, RGBA(255, 255, 255, 50), EntityX(x)+2, EntityY(#hull), EntityZ(x)+2, RGB(255, 255, 127))
+    ;             CreateLine3D(3300, EntityX(x)-2, EntityY(#HULL), EntityZ(x)-2, RGBA(255, 255, 255, 50), EntityX(x)+2, EntityY(#HULL), EntityZ(x)+2, RGB(255, 255, 127))
     ;           EndIf
     ;         EndIf
     ;       Next    
@@ -862,21 +889,23 @@ Procedure app_update()
         boff = Random(10)-5
         p\fired+1
         p\ammo-1
-        dist.f = Sqr((EntityX(#aim)+aoff-EntityX(#hull))  *   (EntityX(#aim)+aoff-EntityX(#hull))+((EntityZ(#aim)+boff-EntityZ(#hull))*(EntityZ(#aim)+boff-EntityZ(#hull))) )
-        rayhitbool = RayCast(EntityX(#hull), 10, EntityZ(#hull), EntityDirectionX(#turr)*dist , 10, EntityDirectionZ(#turr)*dist, #MASK_GENERALPICKMASK)
+        dist.f = Sqr((EntityX(#aim)+aoff-EntityX(#HULL))  *   (EntityX(#aim)+aoff-EntityX(#HULL))+((EntityZ(#aim)+boff-EntityZ(#HULL))*(EntityZ(#aim)+boff-EntityZ(#HULL))) )
+        rayhitbool = RayCast(EntityX(#HULL), 10, EntityZ(#HULL), EntityDirectionX(#turr)*dist , 10, EntityDirectionZ(#turr)*dist, #MASK_GENERALPICKMASK)
         If rayhitbool
-          result = FindMapElement(object(), Str(rayhitbool))
-          If result And IsEntity(rayhitbool)
+          
+          If IsEntity(rayhitbool)
+            result = FindMapElement(object(), Str(rayhitbool))
+            ; If result 
             
-            distent.f = Sqr((EntityX(#hull)-EntityX(rayhitbool))  *   (EntityX(#hull)-EntityX(rayhitbool))+((EntityZ(#hull)-EntityZ(rayhitbool))*(EntityZ(#hull)-EntityZ(rayhitbool))) )
-;             If rayhitbool<651:    
-;               distb = 25 :
-;             Else:
-;               distb = 100:
-;             EndIf ; <<<<<<<<<<<<<<<<  checken
-             distb = 25: 
+            distent.f = Sqr((EntityX(#HULL)-EntityX(rayhitbool))  *   (EntityX(#HULL)-EntityX(rayhitbool))+((EntityZ(#HULL)-EntityZ(rayhitbool))*(EntityZ(#HULL)-EntityZ(rayhitbool))) )
+            ;             If rayhitbool<651:    
+            ;               distb = 25 :
+            ;             Else:
+            ;               distb = 100:
+            ;             EndIf ; <<<<<<<<<<<<<<<<  checken
+            distb = 25: 
             If Abs(distent)<Abs(dist)+distb
-              CreateLine3D(3000, EntityX(#hull), EntityY(#hull), EntityZ(#hull), RGBA(255, 0, 0, 50), PickX(), PickY(), PickZ(), RGB(255, 255, 127))
+              CreateLine3D(3000, EntityX(#HULL), EntityY(#HULL), EntityZ(#HULL), RGBA(255, 0, 0, 50), PickX(), PickY(), PickZ(), RGB(255, 255, 127))
               
               If object()\id = #box
                 ApplyEntityImpulse(rayhitbool, NormalX()*-50, 0, NormalZ()*-50)
@@ -886,7 +915,7 @@ Procedure app_update()
               
               object()\armor-(Random(p\dmgmax,p\dmgmin))          
               object()\behavior=#b_attack
-                        
+              
               
               If object()\armor<1
                 Select object()\id                 
@@ -898,7 +927,7 @@ Procedure app_update()
                 
                 Select object()\id                 
                   Case #BOX, #EGGHULL, 
-                    FreeEntity(rayhitbool)
+                       FreeEntity(rayhitbool)
                     PlaySound(bcrunch)
                     DeleteMapElement(object(), Str(rayhitbool))
                     
@@ -984,8 +1013,8 @@ Procedure app_update()
       
     EndIf
   Else
-    EntityVelocity(#hull,0,0,0)
-    EntityAngularFactor(#hull,0,0,0)
+    EntityVelocity(#HULL,0,0,0)
+    EntityAngularFactor(#HULL,0,0,0)
     MoveEntity(#TURR,EntityX(#HULL),61,EntityZ(#HULL),#PB_World|#PB_Absolute)
     MoveCamera(#MAINCAMERA,EntityX(#HULL),CameraY(#MAINCAMERA),EntityZ(#HULL),#PB_World|#PB_Absolute)
     StopSound(engine)
@@ -1063,7 +1092,7 @@ Procedure app_update()
     If IsEntity(bugs())
       x = bugs()
       If object(Str(x))\behavior = #b_attack
-        EntityLookAt(x, EntityX(#hull), 20, EntityZ(#hull))
+        EntityLookAt(x, EntityX(#HULL), 20, EntityZ(#HULL))
         MoveEntity(x, 0, 0, -object()\spmax, #PB_Local|#PB_Relative)
       ElseIf object()\behavior = #b_wonder
         EntityLookAt(x, object()\tx, 20, object()\ty)
@@ -1091,9 +1120,9 @@ Procedure app_update()
     For x = #BGS To #BGE
       If IsEntity(x)
         If matanim = 1
-          SetEntityMaterial(x, MaterialID(#btex1))
+          SetEntityMaterial(x, MaterialID(#BTEX1))
         Else
-          SetEntityMaterial(x, MaterialID(#btex2))
+          SetEntityMaterial(x, MaterialID(#BTEX2))
         EndIf
       EndIf
     Next x
@@ -1106,79 +1135,28 @@ Procedure app_update()
     FreeMesh(3001)
   EndIf
   RenderWorld(60)
-  If EntityX(#hull) >- 400 And EntityX(#hull)<406
-    If EntityZ(#hull) >- 100 And EntityZ(#hull)<100
-      If EntityX(#hull) >- 400 And EntityX(#hull)<-200
+  If EntityX(#HULL) >- 400 And EntityX(#HULL)<406
+    If EntityZ(#HULL) >- 100 And EntityZ(#HULL)<100
+      If EntityX(#HULL) >- 400 And EntityX(#HULL)<-200
         petskii::ctobject(ScreenWidth()/2, ScreenHeight()/2+50, "Exchange 1 crate for 50 AMMUNITION.", c1, c2)
       EndIf
-      If EntityX(#hull) >- 100 And EntityX(#hull)<100
+      If EntityX(#HULL) >- 100 And EntityX(#HULL)<100
         petskii::ctobject(ScreenWidth()/2, ScreenHeight()/2+50, "Load 50 crates to Helipad to WIN.", c1, c2)
       EndIf
-      If EntityX(#hull)>200 And EntityX(#hull)<400
+      If EntityX(#HULL)>200 And EntityX(#HULL)<400
         petskii::ctobject(ScreenWidth()/2, ScreenHeight()/2+50, "Exchange 1 crate for 25 ARMOR.", c1, c2)
       EndIf
     EndIf
   EndIf
   If tank\won = #KILLED_NEST
-    c3 = RGB(0, 255, 0)
-    petskii::ctobject(ScreenWidth()/2, 100, "TRIUMPHED (WIN)", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 150, "You fired "+Str(tank\fired)+" shots.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 180, "You killed "+Str(tank\kills)+" bugs.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 210, "You accidentally destroyed "+Str(tank\boxdestroyed)+" crates.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 240, "You collected "+Str(tank\collected)+" crates, ", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 270, "You uploaded "+Str(tank\load)+" crates.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 300, "You spent "+Str(tank\spentarmor)+" crates on armor and "+Str(tank\spentammo)+" on ammo.", c3, c2)
-    If object(Str(#NEST))\armor>0
-      petskii::ctobject(ScreenWidth()/2, 330, "The Nest has been destroyed.", c3, c2)
-    EndIf
-    If mins = 0 And seconds = 0
-      mins = (ElapsedMilliseconds()/1000)/60
-      seconds = Mod(ElapsedMilliseconds()/1000, 60)
-      score = 5000+(tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(Str(#NEST))\armor
-    EndIf
-    petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
+    InfoScreen(RGB(0, 255, 0), c2, "TRIUMPHED (WIN)", "The Nest has been destroyed.")
   EndIf
   If tank\won = #COLLECT_ALL
-    c3 = RGB(255, 255, 0)
-    petskii::ctobject(ScreenWidth()/2, 100, "COLLECTED (WIN)", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 150, "You fired "+Str(tank\fired)+" shots.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 180, "You killed "+Str(tank\kills)+" bugs.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 210, "You accidentally destroyed "+Str(tank\boxdestroyed)+" crates.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 240, "You collected "+Str(tank\collected)+" crates, ", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 270, "You uploaded "+Str(tank\load)+" crates.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 300, "You spent "+Str(tank\spentarmor)+" crates on armor and "+Str(tank\spentammo)+" on ammo.", c3, c2)
-    If object(Str(#NEST))\armor>0
-      petskii::ctobject(ScreenWidth()/2, 330, "The Nest has not been destroyed.", RGB(255, 0, 0), c2)
-    EndIf
-    If mins = 0 And seconds = 0
-      mins = (ElapsedMilliseconds()/1000)/60
-      seconds = Mod(ElapsedMilliseconds()/1000, 60)
-      score = 5000+(tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(Str(#NEST))\armor
-    EndIf
-    petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
+     InfoScreen(RGB(255, 255, 0), c2, "COLLECTED (WIN)", "The Nest has not been destroyed.")
   EndIf
   If tank\armor <= 0 And tank\won = 0
     tank\armor = 0
-    c3 = RGB(255, 0, 0)
-    petskii::ctobject(ScreenWidth()/2, 100, "DEVOURED", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 150, "You fired "+Str(tank\fired)+" shots.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 180, "You killed "+Str(tank\kills)+" bugs.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 210, "You accidentally destroyed "+Str(tank\boxdestroyed)+" crates.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 240, "You collected "+Str(tank\collected)+" crates, ", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 270, "You uploaded "+Str(tank\load)+" crates.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 300, "You spent "+Str(tank\spentarmor)+" crates on armor and "+Str(tank\spentammo)+" on ammo.", c3, c2)
-    If object(Str(#NEST))\armor>0
-      petskii::ctobject(ScreenWidth()/2, 330, "The nest has not been destroyed.", c3, c2)
-    EndIf
-    If mins = 0 And seconds = 0
-      mins = (ElapsedMilliseconds()/1000)/60
-      seconds = Mod(ElapsedMilliseconds()/1000, 60)
-      score = (tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(Str(#NEST))\armor
-    EndIf
-    petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
+    InfoScreen(RGB(255, 0, 0), c2, DEVOURED, "The Nest has not been destroyed.")
   Else
     petskii::textoutlined(0, 0, "NEST HEALTH : "+Str(object(Str(#NEST))\armor)+"/1500", c1, c2)
     petskii::textoutlined(0, 30, "AMMO : "+Str(tank\ammo), c1, c2)
@@ -1302,8 +1280,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 932
-; FirstLine = 892
+; CursorPosition = 1158
+; FirstLine = 1140
 ; Folding = -----------------------
 ; EnableXP
 ; DPIAware
