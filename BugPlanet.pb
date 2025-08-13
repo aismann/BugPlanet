@@ -58,7 +58,7 @@ InitSound()
 #MASK_NOPICKMASK = 1<<31
 #MASK_MAINCAMERA = 1<<1
 #MASK_FINAL_RENDERCAMERA = 1<<31
-#RENDEROBJECT = 1
+#RENDEROBJECT = 5001
 #RENDERWIDTH  = 640
 #RENDERHEIGHT = 480
 
@@ -690,7 +690,7 @@ Procedure app_start()
   aim\x = 0 : aim\y = 250 : aim\z = 0
   CreateLight(0, RGB(255, 255, 255), 0, 0, 0, #PB_Light_Directional)
   LightDirection(0, -1, -2, -1)
-  WorldDebug(#PB_World_DebugBody)
+  ;WorldDebug(#PB_World_DebugBody)
   ticker::create(1, 500)
   ticker::create(2, 200)
   ticker::create(3, 15000)
@@ -925,7 +925,8 @@ Procedure app_update()
                 EndSelect
                 
                 Select object()\id                 
-                  Case #BOX, #EGGHULL, 
+                  Case #BOX, #EGGHULL
+
                        FreeEntity(rayhitbool)
                     PlaySound(bcrunch)
                     DeleteMapElement(object(), Str(rayhitbool))
@@ -1279,8 +1280,8 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 704
-; FirstLine = 81
+; CursorPosition = 692
+; FirstLine = 680
 ; Folding = -----------------------
 ; EnableXP
 ; DPIAware
