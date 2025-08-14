@@ -52,17 +52,17 @@ InitSound()
 #AUTOSTRETCH_ON       = 1
 #AUTOSTRETCH_OFF      = 0
 #MAINLOOP_DELAY       = 0
-#MAINCAMERA = 1
-#FINAL_RENDERCAMERA = 31
+
 #MASK_GENERALPICKMASK = 1<<1
 #MASK_NOPICKMASK = 1<<31
 #MASK_MAINCAMERA = 1<<1
 #MASK_FINAL_RENDERCAMERA = 1<<31
-#RENDEROBJECT = 5001
+
 #RENDERWIDTH  = 640
 #RENDERHEIGHT = 480
 
 Enumeration 
+  #RENDEROBJECT
   #HOUSE 
   #GROUND 
   #HULL
@@ -80,12 +80,16 @@ Enumeration
   #WALL
   #BTEX1 
   #BTEX2 
+  #MAINCAMERA 
+  #FINAL_RENDERCAMERA 
 EndEnumeration
 #WALL_RIGHT = 226
 #WALL_LEFT = 227
 #WALL_BELOW = 228
 #WALL_ABOVE = 229
 
+#KILLED_NEST= 1
+#COLLECT_ALL =2
 
 Enumeration  AntBehavior
   #b_Idle
@@ -100,8 +104,7 @@ EndEnumeration
 #BGE = 999
 #MAXDIST = 1000
 
-#KILLED_NEST= 1
-#COLLECT_ALL =2
+
 
 ;- 3 Structures
 Structure pstruct
@@ -722,24 +725,24 @@ Procedure splashimage(img, x, y, a)
 EndProcedure
 
 Procedure InfoScreen(c3, c2, text1.s, text2.s)
-    petskii::ctobject(ScreenWidth()/2, 100, text1, c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 150, "You fired "+Str(tank\fired)+" shots.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 180, "You killed "+Str(tank\kills)+" bugs.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 210, "You accidentally destroyed "+Str(tank\boxdestroyed)+" crates.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 240, "You collected "+Str(tank\collected)+" crates, ", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 270, "You uploaded "+Str(tank\load)+" crates.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 300, "You spent "+Str(tank\spentarmor)+" crates on armor and "+Str(tank\spentammo)+" on ammo.", c3, c2)
-    If object(Str(#NEST))\armor>0
-      petskii::ctobject(ScreenWidth()/2, 330, text2, c3, c2)
-    EndIf
-    If mins = 0 And seconds = 0
-      mins = (ElapsedMilliseconds()/1000)/60
-      seconds = Mod(ElapsedMilliseconds()/1000, 60)
-      score = 5000+(tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(Str(#NEST))\armor
-    EndIf
-    petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
-    petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
-  EndProcedure
+  petskii::ctobject(ScreenWidth()/2, 100, text1, c3, c2)
+  petskii::ctobject(ScreenWidth()/2, 150, "You fired "+Str(tank\fired)+" shots.", c3, c2)
+  petskii::ctobject(ScreenWidth()/2, 180, "You killed "+Str(tank\kills)+" bugs.", c3, c2)
+  petskii::ctobject(ScreenWidth()/2, 210, "You accidentally destroyed "+Str(tank\boxdestroyed)+" crates.", c3, c2)
+  petskii::ctobject(ScreenWidth()/2, 240, "You collected "+Str(tank\collected)+" crates, ", c3, c2)
+  petskii::ctobject(ScreenWidth()/2, 270, "You uploaded "+Str(tank\load)+" crates.", c3, c2)
+  petskii::ctobject(ScreenWidth()/2, 300, "You spent "+Str(tank\spentarmor)+" crates on armor and "+Str(tank\spentammo)+" on ammo.", c3, c2)
+  If object(Str(#NEST))\armor>0
+    petskii::ctobject(ScreenWidth()/2, 330, text2, c3, c2)
+  EndIf
+  If mins = 0 And seconds = 0
+    mins = (ElapsedMilliseconds()/1000)/60
+    seconds = Mod(ElapsedMilliseconds()/1000, 60)
+    score = 5000+(tank\kills*8) + tank\fired -(tank\boxdestroyed*10) + tank\collected*10 + (tank\load*50)-tank\spentarmor-tank\spentammo-object(Str(#NEST))\armor
+  EndIf
+  petskii::ctobject(ScreenWidth()/2, 380, "You survived "+Str(mins)+" minutes and "+Str(seconds)+" seconds.", c3, c2)
+  petskii::ctobject(ScreenWidth()/2, 410, "Your Score is "+Str(score)+".", c3, c2)
+EndProcedure
 
 Procedure app_update()
   Protected w_event.i
@@ -921,7 +924,7 @@ Procedure app_update()
                 
                 Select object()\id                 
                   Case #BOX, #EGGHULL
-
+                    
                     FreeEntity(rayhitbool)
                     PlaySound(bcrunch)
                     DeleteMapElement(object(), Str(rayhitbool))
@@ -1147,7 +1150,7 @@ Procedure app_update()
     InfoScreen(RGB(0, 255, 0), c2, "TRIUMPHED (WIN)", "The Nest has been destroyed.")
   EndIf
   If tank\won = #COLLECT_ALL
-     InfoScreen(RGB(255, 255, 0), c2, "COLLECTED (WIN)", "The Nest has not been destroyed.")
+    InfoScreen(RGB(255, 255, 0), c2, "COLLECTED (WIN)", "The Nest has not been destroyed.")
   EndIf
   If tank\armor <= 0 And tank\won = 0
     tank\armor = 0
@@ -1275,8 +1278,7 @@ DataSection
   Data.a $52, $49, $46, $46, $24, $08, $00, $00, $57, $41, $56, $45, $66, $6D, $74, $20, $10, $00, $00, $00, $01, $00, $01, $00, $40, $1F, $00, $00, $40, $1F, $01, $00, $04, $00, $08, $00, $64, $61, $74, $61
 EndDataSection
 ; IDE Options = PureBasic 6.21 (Windows - x64)
-; CursorPosition = 897
-; FirstLine = 878
+; CursorPosition = 90
 ; Folding = -----------------------
 ; EnableXP
 ; DPIAware
